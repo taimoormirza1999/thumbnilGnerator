@@ -1,7 +1,7 @@
 import axios from 'https://cdn.jsdelivr.net/npm/axios@1.3.5/+esm';
 
 // Use the full server address with port where your backend is running
-const API_URL = 'http://localhost:5002/api';
+const API_URL = 'http://209.38.206.36:3000/api';
 
 // Create axios instance with auth token
 const api = axios.create({
@@ -9,7 +9,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json'
   },
-  timeout: 300000 // Add timeout to avoid long waits on network issues
+  timeout: 10000 // Add timeout to avoid long waits on network issues
 });
 
 // Add auth token to requests if available
@@ -44,7 +44,5 @@ export const deleteReference = (id) => api.delete(`/references/${id}`);
 export const generateThumbnails = (titleId, quantity = 5) => 
   api.post('/thumbnails/generate', { titleId, quantity });
 export const getThumbnails = (titleId) => api.get(`/thumbnails/${titleId}`);
-export const getThumbnailsBatch = (titleId, start = 0, limit = 5) =>
-  api.get(`/thumbnails/batch/${titleId}`, { params: { start, limit } });
-  
+
 export default api; 
