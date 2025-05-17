@@ -1,7 +1,7 @@
 import axios from 'https://cdn.jsdelivr.net/npm/axios@1.3.5/+esm';
 
 // Use the full server address with port where your backend is running
-const API_URL = 'http://209.38.206.36:3000/api';
+const API_URL = 'http://192.168.70.22:5002/api';
 
 // Create axios instance with auth token
 const api = axios.create({
@@ -9,7 +9,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json'
   },
-  timeout: 10000 // Add timeout to avoid long waits on network issues
+  timeout: 20000 // Default timeout for most requests
 });
 
 // Add auth token to requests if available
@@ -18,6 +18,12 @@ api.interceptors.request.use(config => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  // Set longer timeout for thumbnail generation specifically
+  if (config.url === '/thumbnails/generate') {
+    config.timeout = 120000; // 2 minutes for thumbnail generation
+  }
+  
   return config;
 });
 
@@ -42,7 +48,20 @@ export const deleteReference = (id) => api.delete(`/references/${id}`);
 
 // Thumbnail endpoints
 export const generateThumbnails = (titleId, quantity = 5) => 
-  api.post('/thumbnails/generate', { titleId, quantity });
+  api.post('/thumbnails/generate', { titleId, quantity })
+    .catch(error => {
+      // If it's a timeout error, the server might still be processing
+      // We'll throw a special error object for this case
+      if (error.code === 'ECONNABORTED') {
+        console.log('Thumbnail generation request timed out, but the server might still be processing it.');
+        const timeoutError = new Error('Thumbnail generation request timed out, but the server might still be processing it.');
+        timeoutError.isProcessingTimeout = true;
+        timeoutError.titleId = titleId;
+        timeoutError.quantity = quantity;
+        throw timeoutError;
+      }
+      throw error;
+    });
 export const getThumbnails = (titleId) => api.get(`/thumbnails/${titleId}`);
 
 export default api; 
