@@ -326,6 +326,11 @@ input:checked + .slider:before {
     width: 100%;
     aspect-ratio: 16/9;
     object-fit: cover;
+    font-size: 0.8rem;
+    font-style: italic;
+}
+.max-height-fit-content{
+    max-height: fit-content!important;
 }
 
 .thumbnail-actions {

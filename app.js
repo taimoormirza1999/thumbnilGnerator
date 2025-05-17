@@ -1093,6 +1093,9 @@ function renderThumbnail(thumbnailData, index) {
     // Regular thumbnail rendering for successful thumbnails
     const img = document.createElement('img');
     img.src = thumbnailData.image_url;
+    if(thumbnailData.image_url.includes('https://')){
+        img.width = 'fit-content';
+    }
     img.alt = thumbnailData.summary;
     img.className = 'thumbnail-image';
     
@@ -1378,6 +1381,10 @@ function renderSavedThumbnails(title) {
             const thumbContainer = document.createElement('div');
             thumbContainer.className = 'thumbnail-item';
             thumbContainer.id = `thumb-${index}`;
+            if(thumbnail.image_url.includes('uploads/') || thumbnail.status === 'failed'|| thumbnail.image_url===''){
+                thumbContainer.classList.add('max-height-fit-content');
+            }
+            
             thumbnailsGrid.appendChild(thumbContainer);
             
             renderThumbnail(thumbnail, index);
