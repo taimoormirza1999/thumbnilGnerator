@@ -377,6 +377,8 @@ async function handleLogin(event) {
         const response = await login(email, password);
         localStorage.setItem('token', response.data.token);
         currentUser = response.data.user;
+         // Set username in the UI
+         document.getElementById('username-display').textContent = "@"+currentUser.username;
         await loadUserData();
     } catch (error) {
         console.error('Login error:', error);
@@ -407,7 +409,7 @@ async function handleRegister(event) {
         currentUser = response.data.user;
         
         // Set username in the UI
-        document.getElementById('username-display').textContent = currentUser.username;
+        document.getElementById('username-display').textContent = "@"+currentUser.username;
         
         await loadUserData();
     } catch (error) {
@@ -437,9 +439,7 @@ function cardLoader(index) {
      <div class="thumbnail-centered-loader ">
       <div class="spinner-wrapper">
         <div class="spinner-circle"></div>  
-<svg xmlns="http://www.w3.org/2000/svg" style="fill: #3498db" viewBox="0 0 24 24" width="28" height="28">
-  <path d="M10.985 7c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm.6 7.05 3.49-5.59c.41-.65 1.36-.62 1.73.05l4.88 9.01c.36.67-.12 1.48-.88 1.48H3.195a.99.99 0 0 1-.86-1.49l3.08-5.48a1 1 0 0 1 1.5-.29l3.2 2.56c.46.37 1.15.26 1.47-.25z"/>
-</svg>
+        <img src="icons/loading_imge.svg" alt="Loading" class="loading-icon">
       </div>
     </div>
     `;

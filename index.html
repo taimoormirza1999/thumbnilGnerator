@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Thumbnail Generator</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="spinner.css">
+
 </head>
 <body>
     <!-- Login/Register Container -->
@@ -52,8 +54,9 @@
     <div id="app-container" class="app-container" style="display: none;">
         <!-- Loading Overlay -->
         <div id="loading-overlay" class="loading-overlay">
-            <div class="spinner"></div>
-            <p>Loading...</p>
+            <!-- <div class="spinner"></div> -->
+            <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+            <p class="loading-text">Loading...</p>
         </div>
         
         <!-- Left Sidebar for Titles -->
