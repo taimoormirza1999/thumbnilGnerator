@@ -1,7 +1,8 @@
 const { pool } = require('../database');
 const openRouterService = require('../services/openRouterService');
 const openAIService = require('../services/openAIService');
-
+const ThumbnailDispatcher = require('../services/ThumbnailDispatcher');
+const MAX_PARALLEL = 5;
 // Generate thumbnail ideas (parallel processing)
 async function generateThumbnails(req, res) {
   if (!req.user || !req.user.id) {
@@ -10,7 +11,6 @@ async function generateThumbnails(req, res) {
   }
 
   const { titleId, quantity = 5 } = req.body;
-  const MAX_PARALLEL = 5;
   
   if (!titleId) {
     return res.status(400).json({ error: 'Title ID is required' });
@@ -48,7 +48,12 @@ async function generateThumbnails(req, res) {
     );
     
     const references = refRows.map(row => ({ id: row.id, image_data: row.image_data }));
-    
+    const dispatcher = new ThumbnailDispatcher({
+      maxParallel: MAX_PARALLEL,
+      pool,
+      openAIService,
+      references
+    });
     // Get previous ideas for this title to avoid duplication
     const prevParams = [titleId];
     if (prevParams.some(p => p === undefined)) {
@@ -71,18 +76,18 @@ async function generateThumbnails(req, res) {
         [...prevIdeas, ...newIdeas] // Include previously generated ideas to avoid repetition
       );
       newIdeas.push(idea);
-      
+      dispatcher.enqueue(idea);
       // Create thumbnail entry in processing state
-      const thumbnailParams = [titleId, idea.id, 'pending'];
-      if (thumbnailParams.some(p => p === undefined)) {
-        console.error('Attempted to execute query with undefined parameter:', { thumbnailParams });
-        return res.status(500).json({ error: 'Internal server error: Invalid query parameter detected' });
-      }
+      // const thumbnailParams = [titleId, idea.id, 'pending'];
+      // if (thumbnailParams.some(p => p === undefined)) {
+      //   console.error('Attempted to execute query with undefined parameter:', { thumbnailParams });
+      //   return res.status(500).json({ error: 'Internal server error: Invalid query parameter detected' });
+      // }
       
-      await pool.execute(
-        'INSERT INTO thumbnails (title_id, idea_id, status) VALUES (?, ?, ?)',
-        thumbnailParams
-      );
+      // await pool.execute(
+      //   'INSERT INTO thumbnails (title_id, idea_id, status) VALUES (?, ?, ?)',
+      //   thumbnailParams
+      // );
     }
     
     // Start image generation in parallel (respecting MAX_PARALLEL limit)

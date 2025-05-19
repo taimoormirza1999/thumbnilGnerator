@@ -1,5 +1,6 @@
 import axios from 'https://cdn.jsdelivr.net/npm/axios@1.3.5/+esm';
-
+   // Add this at the top of apiService.js
+   let preventReload = false;
 // Use the full server address with port where your backend is running
 const API_URL = 'http://192.168.70.26:5002/api';
 
@@ -62,6 +63,24 @@ export const generateThumbnails = (titleId, quantity = 5) =>
       }
       throw error;
     });
-export const getThumbnails = (titleId) => api.get(`/thumbnails/${titleId}`);
+export const getThumbnails = async (titleId) => {
+  // Add this check
+  if (preventReload) {
+    console.log("Prevented API call to avoid reload");
+    return { data: { thumbnails: [] } };
+  }
+  
+  // Original code continues...
+  const response = await api.get(`/thumbnails/${titleId}`);
+  return response;
+};
 
 export default api; 
+
+// Near your getThumbnails function
+setInterval(() => {
+  // Check global flag set by app.js
+  if (window.preventReload !== undefined) {
+    preventReload = window.preventReload;
+  }
+}, 100); 
