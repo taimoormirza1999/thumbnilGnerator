@@ -28,9 +28,9 @@ app.get('/', (req, res) => {
   res.json({ message: 'AI Thumbnail Generator API' });
 });
 
-app.get('/test', (req, res) => {
-  initializeDatabase_railway();
-});
+// app.get('/test', (req, res) => {
+//   initializeDatabase_railway();
+// });
 
 // Initialize database and start server
 initializeDatabase()
