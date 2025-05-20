@@ -132,6 +132,84 @@ async function generateThumbnails(req, res) {
   }
 }
 
+
+async function regenerateThumbnail(req, res) {
+  if (!req.user || !req.user.id) {
+    console.error('User not authenticated properly');
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  const { titleId, thumbnailId } = req.body;
+  
+  if (!thumbnailId || !titleId) {
+    return res.status(400).json({ error: 'Both Title ID and Thumbnail ID are required' });
+  }
+  
+  try {
+    // Get the existing thumbnail and its corresponding idea
+    const [thumbnailRows] = await pool.execute(
+      'SELECT t.id, t.title_id, i.id as idea_id, i.summary, i.full_prompt as fullPrompt ' +
+      'FROM thumbnails t ' +
+      'JOIN ideas i ON t.idea_id = i.id ' +
+      'WHERE t.id = ?',
+      [thumbnailId]
+    );
+    
+    if (thumbnailRows.length === 0) {
+      return res.status(404).json({ error: 'Thumbnail not found' });
+    }
+    
+    const thumbnail = thumbnailRows[0];
+    const ideaId = thumbnail.idea_id;
+    
+    // Get reference images (same as in generateThumbnails)
+    const [refRows] = await pool.execute(
+      'SELECT id, image_data FROM references2 WHERE title_id = ? OR (user_id = ? AND is_global = 1)',
+      [titleId, req.user.id]
+    );
+    
+    const references = refRows.map(row => ({ id: row.id, image_data: row.image_data }));
+    
+    // Create a dispatcher with just one item
+    const dispatcher = new ThumbnailDispatcher({
+      maxParallel: 1, // Only one item to process
+      pool,
+      openAIService,
+      references
+    });
+    
+    // Update thumbnail status to processing
+    await pool.execute(
+      'UPDATE thumbnails SET status = ?, image_url = NULL WHERE id = ?',
+      ['processing', thumbnailId]
+    );
+    
+    // Use the existing idea but regenerate the image
+    const idea = {
+      id: ideaId,
+      fullPrompt: thumbnail.fullPrompt,
+      summary: thumbnail.summary,
+      titleId: titleId // Add titleId which is required by the dispatcher
+    };
+    
+    // Enqueue the idea - this will automatically start processing
+    await dispatcher.enqueue(idea, true);
+    
+    // Return immediately
+    res.status(200).json({
+      message: `Started regenerating thumbnail ${thumbnailId}`,
+      thumbnail: {
+        id: thumbnailId,
+        status: 'processing',
+        title_id: titleId,
+        summary: thumbnail.summary
+      }
+    });
+  } catch (error) {
+    console.error('Error in regenerateThumbnail:', error);
+    res.status(500).json({ error: 'Failed to regenerate thumbnail: ' + error.message });
+  }
+}
 // Get status of all thumbnails for a title
 async function getThumbnails(req, res) {
   if (!req.user || !req.user.id) {
@@ -285,8 +363,8 @@ async function getThumbnails(req, res) {
     res.status(500).json({ error: `Failed to get thumbnails: ${error.message}` });
   }
 }
-
 module.exports = {
   generateThumbnails,
-  getThumbnails
+  getThumbnails,
+  regenerateThumbnail
 }; 

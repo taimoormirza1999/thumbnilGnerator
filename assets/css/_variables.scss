@@ -1,0 +1,122 @@
+$black-color: #000;
+$black-color-10: rgba(0, 0, 0, 0.1);
+$black-color-20: rgba(0, 0, 0, 0.2);
+$black-color-40: rgba(0, 0, 0, 0.4);
+$black-color-70: rgba(0, 0, 0, 0.7);
+$black-color-80: rgba(0, 0, 0, 0.8);
+$white-color: #fff;
+$white-color-05: rgba(255, 255, 255, 0.05);
+$white-color-10: rgba(255, 255, 255, 0.1);
+$white-color-20: rgba(255, 255, 255, 0.2);
+$white-color-50: rgba(255, 255, 255, 0.5);
+$white-color-60: rgba(255, 255, 255, 0.6);
+$white-color-80: rgba(255, 255, 255, 0.8);
+$gray-color-e1: #e1e1e1;
+$gray-color-92: rgba(92, 92, 92, 1);
+$gray-color-3: #2f3031;
+$border-radius-8: 8px;
+$border-radius-12: 12px;
+$border-radius-16: 16px;
+$primary-color: rgba(206, 6, 186, 1);
+
+$notiifcationicon-color1: linear-gradient(
+  145.32deg,
+  #240121 -14.49%,
+  #8a047f 82.49%
+);
+$notiifcationicon-color2: linear-gradient(
+  145.32deg,
+  #ffffff -14.49%,
+  #048a40 82.49%
+);
+$notiifcationicon-color3: linear-gradient(
+  145.32deg,
+  #fbfbfb -14.49%,
+  #04068a 82.49%
+);
+$notiifcationicon-color4: linear-gradient(
+  145.32deg,
+  #ebe5eb -14.49%,
+  #8a5204 82.49%
+);
+$notiifcationicon-color5: linear-gradient(
+  145.32deg,
+  #ffffff -14.49%,
+  #8a8304 82.49%
+);
+
+$icon-height: 24px;
+$icon-width: 24px;
+$icon-font-size: 1.25rem;
+$button-icon-gap: 0.5rem;
+$button-height: 2.5rem;
+$button-height-mobile: 2rem;
+$input-height: 3rem;
+$input-height-mobile: 2.5rem;
+$sm-avatar-height: 2.8rem;
+$sm-avatar-height-mobile: 2.3rem;
+$dark-mode-card-task-bgcolor: linear-gradient(
+  135deg,
+  #240121 0%,
+  #4f0142 100%
+) !important;
+$purple-mode-card-task-bgcolor: linear-gradient(
+  135deg,
+  #240121 0%,
+  #4f0142 100%
+) !important;
+$default-mode-topbar-bgcolor: rgba(24, 25, 28, 1);
+$default-mode-main-bgcolor: rgba(36, 37, 38, 1);
+$default-mode-welcome-logo-bgcolor: rgba(24, 24, 24, 1);
+$default-mode-card-task-bgcolor: #00000094;
+// $default-mode-card-task-bgcolor: rgba(53, 53, 53, 1);
+$black-mode-card-task-bgcolor: rgba(9, 1, 12, 1);
+$brown-mode-card-task-bgcolor: rgba(65, 4, 4, 1);
+$dark-mode-bar-bgcolor: rgba(40, 3, 59, 0.6);
+$purple-mode-bar-bgcolor: rgba(40, 3, 59, 0.6);
+$black-mode-bar-bgcolor: rgba(36, 37, 38, 0.5);
+$brown-mode-bar-bgcolor: rgba(65, 4, 4, 1);
+$light-mode-bar-bgcolor: rgba(255, 255, 255, 0.6);
+$dark-mode-modal-bgcolor: $black-color;
+$dark-mode-modal-border: 1.3px solid $white-color-20;
+$dark-mode-bar-bgcolor: var(--bs-primary-darkpurple-linear-gradient);
+$dark-mode-message-ai-border: 1.3px solid rgba(211, 211, 211, 0.5);
+$dark-mode-message-ai-color: #e4e6eb;
+$default-mode-message-user-bgcolor: $white-color-20;
+$dark-mode-message-user-bgcolor: $white-color-20;
+$purple-mode-message-user-bgcolor: $white-color-20;
+$black-mode-message-user-bgcolor: $white-color-20;
+$brown-mode-message-user-bgcolor: $white-color-20;
+$light-mode-message-user-bgcolor: $white-color-20;
+$dark-mode-prompt-btn-bgcolor: $white-color-10;
+$dark-mode-prompt-btn-border: rgba(248, 249, 250, 0.5);
+$dark-mode-bar-bgcolor: $white-color-20;
+$dark-mode-message-user-color: $white-color;
+
+$black-mode-modal-container-bgcolor: #171717;
+$purple-mode-modal-container-bgcolor: #120211;
+$brown-mode-modal-container-bgcolor: #190404;
+$default-mode-modal-container-bgcolor: #000000;
+
+$black-mode-modal-header-bgcolor: #0d0c0c;
+$purple-mode-modal-header-bgcolor: #361734;
+$brown-mode-modal-header-bgcolor: #410404;
+$default-mode-modal-header-bgcolor: #000000;
+
+$black-mode-modal-input-bgcolor: rgba(0, 0, 0, 0.2);
+$purple-mode-modal-input-bgcolor: rgba(12, 1, 17, 0.5);
+$brown-mode-modal-input-bgcolor: rgba(12, 1, 17, 0.2);
+$default-mode-modal-input-bgcolor: rgba(10, 10, 10, 0.2);
+
+$transition-duration-34: 0.34s;
+$transition-duration-40: 0.4s;
+$transition-duration-50: 0.5s;
+$notification-icon-padding: 0.5rem;
+$boder-width_1_3: 1.3px;
+$boder-width_1_5: 1.5px;
+
+$default-icon-container-height: 1.75rem;
+$default-icon-container-width: 1.75rem;
+$default-icon-container-font-size: 1.75rem;
+$default-icon-height: 1rem;
+$default-icon-width: 1rem;

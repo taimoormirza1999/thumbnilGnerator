@@ -46,7 +46,9 @@ export const uploadReference = (titleId, imageData, isGlobal = false) =>
 export const getReferences = (titleId) => api.get(`/references/${titleId}`);
 export const getGlobalReferences = () => api.get('/references/global');
 export const deleteReference = (id) => api.delete(`/references/${id}`);
-
+// Regenerate thumbnail endpoint
+export const regenerateThumbnail = (titleId, thumbnailId) => 
+  api.post('/thumbnails/regenerate', { titleId, thumbnailId });
 // Thumbnail endpoints
 export const generateThumbnails = (titleId, quantity = 5) => 
   api.post('/thumbnails/generate', { titleId, quantity })
@@ -84,3 +86,4 @@ setInterval(() => {
     preventReload = window.preventReload;
   }
 }, 100); 
+

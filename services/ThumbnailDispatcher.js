@@ -8,12 +8,14 @@ class ThumbnailDispatcher {
       this.queue = [];
     }
   
-    async enqueue(idea) {
-      // insert the pending‐state row immediately
-      await this.pool.execute(
-        'INSERT INTO thumbnails (title_id, idea_id, status) VALUES (?, ?, ?)',
-        [idea.titleId, idea.id, 'pending']
-      );
+    async enqueue(idea, regenerate = false) {
+      if (!regenerate) {
+        // insert the pending‐state row immediately
+        await this.pool.execute(
+          'INSERT INTO thumbnails (title_id, idea_id, status) VALUES (?, ?, ?)',
+          [idea.titleId, idea.id, 'pending']
+        );
+      }
   
       const task = () => this._generateImage(idea);
       if (this.active.size < this.maxParallel) {

@@ -3,7 +3,7 @@ import {
   login, register, getProfile, 
   createTitle, getTitles, getTitle, updateTitle, deleteTitle,
   uploadReference, getReferences, getGlobalReferences, deleteReference,
-  generateThumbnails, getThumbnails
+  generateThumbnails, getThumbnails, regenerateThumbnail
 } from './frontend/apiService.js';
 
 // Simulated Server API
@@ -156,29 +156,29 @@ const ServerAPI = {
     },
     
     // Regenerate a single thumbnail
-    async regenerateThumbnail(titleObj, references, index) {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                const summaryText = generatePromptSummary(titleObj.title, titleObj.instructions);
+    // async regenerateThumbnail(titleObj, references, index) {
+    //     return new Promise(resolve => {
+    //         setTimeout(() => {
+    //             const summaryText = generatePromptSummary(titleObj.title, titleObj.instructions);
                 
-                const thumbnailData = {
-                    id: generateID(),
-                    image_url: `https://placehold.co/600x400/e74c3c/ffffff?text=Regenerated+${index+1}`,
-                    summary: `Regenerated concept ${index+1} for "${titleObj.title}"`,
-                    promptDetails: {
-                        summary: summaryText,
-                        title: titleObj.title,
-                        instructions: titleObj.instructions || 'No custom instructions provided',
-                        referenceCount: references.length,
-                        referenceImages: references.map(ref => ref.data),
-                        fullPrompt: generateFullPrompt(titleObj.title, titleObj.instructions, index)
-                    }
-                };
+    //             const thumbnailData = {
+    //                 id: generateID(),
+    //                 image_url: `https://placehold.co/600x400/e74c3c/ffffff?text=Regenerated+${index+1}`,
+    //                 summary: `Regenerated concept ${index+1} for "${titleObj.title}"`,
+    //                 promptDetails: {
+    //                     summary: summaryText,
+    //                     title: titleObj.title,
+    //                     instructions: titleObj.instructions || 'No custom instructions provided',
+    //                     referenceCount: references.length,
+    //                     referenceImages: references.map(ref => ref.data),
+    //                     fullPrompt: generateFullPrompt(titleObj.title, titleObj.instructions, index)
+    //                 }
+    //             };
                 
-                resolve(thumbnailData);
-            }, 2000);
-        });
-    }
+    //             resolve(thumbnailData);
+    //         }, 2000);
+    //     });
+    // }
 };
 
 // Data Storage (will now communicate with the backend)
@@ -228,6 +228,7 @@ const referenceCount = document.getElementById('reference-count');
 const referenceThumbnails = document.getElementById('reference-thumbnails');
 const fullPrompt = document.getElementById('full-prompt');
 const loadingOverlay = document.getElementById('loading-overlay');
+const copyBtn = document.querySelector('.copy-btn');
 
 // Callback to handle when a thumbnail is ready
 let thumbnailReady = null;
@@ -385,7 +386,7 @@ async function handleLogin(event) {
          document.getElementById('username-display').textContent = "@"+currentUser.username;
         await loadUserData();
     } catch (error) {
-        console.error('Login error:', error);
+        console.error('Login error:', error.message);
         alert(error.response?.data?.error || 'Login failed. Please try again.');
     }
 }
@@ -459,6 +460,51 @@ function cardLoader(index) {
     card.dataset.timerId = interval;
     return card;
 }
+// Create a reusable function to generate thumbnail action buttons
+function createThumbnailActionButtons(thumbnail, index, container) {
+    // Create actions container
+    const actions = document.createElement('div');
+    actions.className = 'thumbnail-actions';
+    
+    // Download button
+    const downloadBtn = document.createElement('button');
+    downloadBtn.type = 'button';
+    downloadBtn.className = 'action-btn';
+    downloadBtn.innerHTML = `<img src="/icons/download.svg" alt="Download" style=" vertical-align:middle; margin-right:6px;">`;
+    
+    downloadBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const link = document.createElement('a');
+        link.href = thumbnail.image_url;
+        link.download = `thumbnail-${index + 1}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+    
+    // Regenerate button
+    const regenerateBtn = document.createElement('button');
+    regenerateBtn.className = 'action-btn';
+    regenerateBtn.type = 'button';
+    regenerateBtn.innerHTML = `<img src="/icons/regenerate.svg" alt="Regenerate" style=" vertical-align:middle; margin-right:6px;">`;
+
+    
+    regenerateBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        regenerateSingleThumbnail(index, thumbnail.id);
+    });
+    
+    // Add buttons to actions container
+    actions.appendChild(downloadBtn);
+    actions.appendChild(regenerateBtn);
+    
+    // Add actions to provided container
+    container.appendChild(actions);
+    
+    return actions;
+}
 
 // Logout function
 function logout() {
@@ -529,7 +575,9 @@ function setupEventListeners() {
             storeGenerationRequest(currentTitle.id, quantity);
             // Show batch loading cards at the beginning of the grid
             showBatchLoadingCards(quantity, 0, batchId);            // Generate thumbnails
-            console.log("Generating thumbnails for title ID:", currentTitle.id, "Quantity:", quantity);
+            console.log("Current title before generation:", currentTitle);
+            console.log("Title ID being sent:", currentTitle.id);
+            console.log("Quantity being sent:", quantity);
             const generateResponse = await generateThumbnails(currentTitle.id, quantity);
             console.log("Generate thumbnails response:", generateResponse.data);
             
@@ -1355,47 +1403,7 @@ async function pollThumbnailStatus(titleId, expectedQuantity, attempt = 0, batch
                         thumbElement.appendChild(img);
                         
                         // Add actions
-                        const actions = document.createElement('div');
-                        actions.className = 'thumbnail-actions';
-                        
-                        const downloadBtn = document.createElement('button');
-                        downloadBtn.type = 'button';
-                        
-                        downloadBtn.className = 'action-btn';
-                        downloadBtn.textContent = 'Download';
-                        downloadBtn.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            const link = document.createElement('a');
-                            link.href = thumbnail.image_url;
-                            // Suggest a filename:
-                            link.download = `thumbnail-${index + 1}.png`;
-                            // Firefox requires the link to be in the DOM
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                        });
-                        
-                        const regenerateBtn = document.createElement('button');
-                        regenerateBtn.className = 'action-btn';
-                        regenerateBtn.type = 'button';
-                        regenerateBtn.textContent = 'Regenerate';
-                        regenerateBtn.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            regenerateSingleThumbnail(index, thumbnail.id);
-                        });
-                        
-                        actions.appendChild(downloadBtn);
-                        actions.appendChild(regenerateBtn);
-                        thumbElement.appendChild(actions);
-                        
-                        // Add click to view details
-                        thumbElement.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            showPromptDetails(thumbnail);
-                        });
-                        
+                        createThumbnailActionButtons(thumbnail, index, thumbElement);
                         // Replace the loader with the completed thumbnail
                         if (loader.dataset.timerId) {
                             clearInterval(parseInt(loader.dataset.timerId));
@@ -1410,16 +1418,21 @@ async function pollThumbnailStatus(titleId, expectedQuantity, attempt = 0, batch
                     // Handle image loading error but still show as a completed thumbnail
                     img.onerror = function() {
                         console.log(`Image failed to load for thumbnail ${thumbnail.id}: ${thumbnail.image_url}`);
-                        
-                        // Use a fallback image
+                    
+                            // Use a fallback image
                         img.src = 'icons/image-error.svg';
                         img.classList.add('image-error');
                         img.alt = 'Image failed to load';
+                        // const errorText = document.createElement('div');
+                        // errorText.className = 'error-Text';
+                        // errorText.id = loader.id;
+                        // errorText.dataset.id = thumbnail.id;
+                        // errorText.appendChild(img);
                         
                         // Create new onload handler for the error image
                         img.onload = function() {
                             thumbContainer.appendChild(img);
-                            
+                            // thumbContainer.appendChild(errorText);
                             // Add actions with just regenerate button for failed images
                             const actions = document.createElement('div');
                             actions.className = 'thumbnail-actions';
@@ -1520,11 +1533,6 @@ function finishPolling(titleId, errorMessage, batchId) {
     // Mark polling as complete for this title
     delete activePollingProcesses[titleId];
     
-    // Try to load the final thumbnails one more time
-    // if (currentTitle && currentTitle.id === parseInt(titleId)) {
-    //     loadThumbnails(titleId).catch(e => console.error("Error loading final thumbnails:", e));
-    // }
-    
     // Clear any remaining loading animations/intervals
     const loaders = document.querySelectorAll('.thumbnail-item.loading');
     loaders.forEach(loader => {
@@ -1533,6 +1541,7 @@ function finishPolling(titleId, errorMessage, batchId) {
         }
     });
 
+    // Reset reload prevention flags after a short delay
     setTimeout(() => {
         preventPageReloads = false;
         window.preventReload = false;
@@ -1692,40 +1701,9 @@ function renderThumbnail(thumbnail, index) {
         thumbContainer.appendChild(img);
         
         // Add actions
-        const actions = document.createElement('div');
-        actions.className = 'thumbnail-actions';
-        
-        const downloadBtn = document.createElement('button');
-        downloadBtn.className = 'action-btn';
-        downloadBtn.type = 'button';
-        downloadBtn.textContent = 'Download';
-        downloadBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const link = document.createElement('a');
-            link.href = thumbnail.image_url;
-            // Suggest a filename:
-            link.download = `thumbnail-${index + 1}.png`;
-            // Firefox requires the link to be in the DOM
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
-        
-        const regenerateBtn = document.createElement('button');
-        regenerateBtn.className = 'action-btn';
-        regenerateBtn.type = 'button';
-        regenerateBtn.textContent = 'Regenerate';
-        regenerateBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            regenerateSingleThumbnail(index, thumbnail.id);
-        });
-        
-        actions.appendChild(downloadBtn);
-        actions.appendChild(regenerateBtn);
-        thumbContainer.appendChild(actions);
-        
+
+        createThumbnailActionButtons(thumbnail, index, thumbContainer);
+
         // Add click to view details
         thumbContainer.addEventListener('click', (e) => {
             e.preventDefault();
@@ -1742,10 +1720,15 @@ function renderThumbnail(thumbnail, index) {
         img.classList.add('image-error');
         img.alt = 'Image failed to load';
         
+        const errorText = document.createElement('h4');
+        errorText.className = 'error-Text font-weight-bold text-4xl';
+        errorText.id = loader.id;
+        errorText.dataset.id = thumbnail.id;
+        errorText.textContent = 'Failed to load image';
         // Create new onload handler for the error image
         img.onload = function() {
-            thumbContainer.appendChild(img);
-            
+            // thumbContainer.appendChild(img);
+            thumbContainer.appendChild(errorText);
             // Add actions with just regenerate button for failed images
             const actions = document.createElement('div');
             actions.className = 'thumbnail-actions';
@@ -1779,92 +1762,93 @@ function regenerateSingleThumbnail(index, thumbnailId) {
             thumbContainer.appendChild(loader);
         }
         
-        // Make API call to regenerate thumbnail
-        ServerAPI.regenerateThumbnail(currentTitle, 
-            globalReferenceToggle.checked ? globalReferences : currentTitle.references,
-            index
-        )
-        .then(thumbnail => {
-            // Update the thumbnail in the current title
-            const thumbnailIndex = currentTitle.thumbnails.findIndex(t => t.id === thumbnailId);
-            if (thumbnailIndex !== -1) {
-                currentTitle.thumbnails[thumbnailIndex] = thumbnail;
-            } else {
-                currentTitle.thumbnails.push(thumbnail);
-            }
-            
-            // Create new thumbnail element without replacing the loader yet
-            const tempContainer = document.createElement('div');
-            tempContainer.className = 'thumbnail-item';
-            tempContainer.dataset.id = thumbnail.id;
-            
-            // Add the image
-            const img = document.createElement('img');
-            img.src = thumbnail.image_url;
-            img.alt = thumbnail.summary || 'Generated thumbnail';
-            img.className = 'thumbnail-image';
-            
-            // Only replace loader after image has loaded
-            img.onload = function() {
-                // Now that image is loaded, update the actual container
-                renderThumbnail(thumbnail, index);
-            };
-            
-            // Handle image loading error
-            img.onerror = function() {
-                console.log(`Image failed to load for regenerated thumbnail: ${thumbnail.image_url}`);
+        // Prevent reloads during regeneration
+        preventPageReloads = true;
+        window.preventReload = true;
+        
+        // Use the apiService function with the correct URL pattern
+        regenerateThumbnail(currentTitle.id, thumbnailId)
+            .then(response => {
+                console.log('Regeneration started:', response.data);
                 
-                // Use a fallback image
-                img.src = 'icons/image-error.svg';
-                img.classList.add('image-error');
-                img.alt = 'Image failed to load';
+                // Start polling for the updated thumbnail
+                pollSingleThumbnailStatus(currentTitle.id, thumbnailId, index);
+            })
+            .catch(error => {
+                console.error('Error starting thumbnail regeneration:', error);
+                renderErrorThumbnail('Failed to start regeneration', index, thumbnailId);
                 
-                // Still render the thumbnail but with the error image
-                img.onload = function() {
-                    // Now that error image is loaded, update the container
-                    // but with limited actions
-                    const tempContainer = document.createElement('div');
-                    tempContainer.className = 'thumbnail-item';
-                    tempContainer.dataset.id = thumbnail.id;
-                    
-                    // Add the error image
-                    tempContainer.appendChild(img);
-                    
-                    // Add only the regenerate button
-                    const actions = document.createElement('div');
-                    actions.className = 'thumbnail-actions';
-                    
-                    const regenerateBtn = document.createElement('button');
-                    regenerateBtn.className = 'action-btn';
-                    regenerateBtn.type = 'button';
-                    regenerateBtn.textContent = 'Regenerate';
-                    regenerateBtn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        regenerateSingleThumbnail(index, thumbnail.id);
-                    });
-                    
-                    actions.appendChild(regenerateBtn);
-                    tempContainer.appendChild(actions);
-                
-                    // Replace content in the actual container
-                    if (thumbContainer) {
-                        thumbContainer.innerHTML = '';
-                        while (tempContainer.firstChild) {
-                            thumbContainer.appendChild(tempContainer.firstChild);
-                        }
-                    }
-                };
-            };
-        })
-        .catch(error => {
-            console.error('Error regenerating thumbnail:', error);
-            // Show error state using the dedicated function
-            renderErrorThumbnail('Failed to regenerate thumbnail', index, thumbnailId);
-        });
+                // Reset reload prevention
+                preventPageReloads = false;
+                window.preventReload = false;
+            });
     } catch (error) {
         console.error('Error setting up thumbnail regeneration:', error);
     }
+}
+
+// New function to poll for a single thumbnail status
+function pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt = 0) {
+    const maxAttempts = 30; // Poll for up to 90 seconds
+    const pollInterval = 3000; // Poll every 3 seconds
+    
+    console.log(`[Poll #${attempt + 1}] Polling for single thumbnail ${thumbnailId}`);
+    
+    if (attempt >= maxAttempts) {
+        console.warn(`Reached maximum polling attempts for thumbnail ${thumbnailId}`);
+        renderErrorThumbnail('Regeneration timed out', index, thumbnailId);
+        preventPageReloads = false;
+        window.preventReload = false;
+        return;
+    }
+    
+    // Get the specific thumbnail status
+    getThumbnails(titleId)
+        .then(response => {
+            const thumbnails = response.data.thumbnails || [];
+            const thumbnail = thumbnails.find(t => t.id === thumbnailId);
+            
+            if (!thumbnail) {
+                console.warn(`Thumbnail ${thumbnailId} not found in response`);
+                setTimeout(() => {
+                    pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt + 1);
+                }, pollInterval);
+                return;
+            }
+            
+            if (thumbnail.status === 'completed') {
+                // Update the thumbnail in the current title
+                if (currentTitle && currentTitle.thumbnails) {
+                    const thumbnailIndex = currentTitle.thumbnails.findIndex(t => t.id === thumbnailId);
+                    if (thumbnailIndex !== -1) {
+                        currentTitle.thumbnails[thumbnailIndex] = thumbnail;
+                    }
+                }
+                
+                // Render the updated thumbnail
+                renderThumbnail(thumbnail, index);
+                
+                // Reset reload prevention
+                preventPageReloads = false;
+                window.preventReload = false;
+            } else if (thumbnail.status === 'failed') {
+                renderErrorThumbnail(thumbnail.error_message || 'Regeneration failed', index, thumbnailId);
+                preventPageReloads = false;
+                window.preventReload = false;
+            } else {
+                // Still processing, poll again
+                setTimeout(() => {
+                    pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt + 1);
+                }, pollInterval);
+            }
+        })
+        .catch(error => {
+            console.error('Error polling thumbnail status:', error);
+            // Try again with backoff
+            setTimeout(() => {
+                pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt + 1);
+            }, pollInterval * Math.min(2, attempt/5 + 1));
+        });
 }
 
 // Show prompt details in modal
@@ -1905,8 +1889,20 @@ function showPromptDetails(thumbnail) {
     // Show the modal
     promptModal.style.display = 'block';
     document.body.style.overflow = 'hidden';
-}
 
+    // Copy full prompt
+    copyBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        copyFullPrompt(thumbnail.promptDetails.fullPrompt);
+    });
+ 
+}
+function copyFullPrompt(prompt) {
+    navigator.clipboard?.writeText(prompt);
+    
+    Toast('success', 'Prompt Copied', 'Full prompt copied to clipboard successfully!');
+}
 // Simulate progress animation for progress bars
 function simulateProgress(progressElement, startPct = 0, endPct = 100, completionMessage = null, duration = 2000, callback = null) {
     if (!progressElement) return;
