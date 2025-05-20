@@ -28,21 +28,9 @@ app.get('/', (req, res) => {
   res.json({ message: 'AI Thumbnail Generator API' });
 });
 
-// app.get('/test', (req, res) => {
-//   initializeDatabase_railway();
-// });
 
 // Initialize database and start server
-initializeDatabase()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  })
-  .catch(err => {
-    console.error('Failed to start server:', err);
-    process.exit(1);
-  }); 
+
 initializeDatabase()
   .then(() => {
     app.listen(PORT, () => {
