@@ -1084,6 +1084,10 @@ function renderSavedThumbnails(title) {
             const thumbContainer = document.createElement('div');
             thumbContainer.className = 'thumbnail-item';
             thumbContainer.id = `thumb-${index}`;
+            if(thumbnail.image_url.includes('uploads/') || thumbnail.status === 'failed'|| thumbnail.image_url===''){
+                thumbContainer.classList.add('max-height-fit-content');
+            }
+            
             thumbnailsGrid.appendChild(thumbContainer);
             
             renderThumbnail(thumbnail, index);
