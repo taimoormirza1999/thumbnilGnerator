@@ -51,7 +51,7 @@ h1, h2, h3 {
     align-items: center;
     margin-bottom: 20px;
     padding-bottom: 10px;
-    border-bottom: 1px solid #ffffff;
+    border-bottom: 0.5px solid #ffffff;
 }
 .generate-btn{
     border-radius: 10px!important;
@@ -178,7 +178,7 @@ input:checked + .slider:before {
 
 .dropzone {
     border: 2px dashed #ddd;
-    border-radius: 4px;
+    border-radius: 10px;
     padding: 30px;
     text-align: center;
     margin-bottom: 15px;
@@ -252,8 +252,9 @@ input:checked + .slider:before {
     width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: 10px;
     font-size: 16px;
+    
 }
 
 .input-group textarea {
@@ -482,6 +483,11 @@ input:checked + .slider:before {
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
+    .main-content {
+        padding: 0.8rem;
+        margin-left: 0px;
+       
+    }    
     .app-container {
         flex-direction: column;
     }
@@ -489,6 +495,10 @@ input:checked + .slider:before {
     .sidebar {
         width: 100%;
         max-height: 200px;
+        position: static;
+    }
+    .login-container .login-container-content{
+        width:95%!important;
     }
 }
 
@@ -711,7 +721,7 @@ min-width: 50%;
     align-items: center;
     margin-bottom: 15px;
     padding-bottom: 10px;
-    border-bottom: 1px solid #34495e;
+    border-bottom: 0.5px solid #ffffff;
     color: #ecf0f1;
     font-size: 14px;
 }
@@ -764,6 +774,7 @@ min-width: 50%;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    width: 100%;
 
   }
   
@@ -789,7 +800,7 @@ min-width: 50%;
     width: 48px;
     height: 48px;
     border: 3px solid transparent;
-    border-top: 3px solid var(--primary-color); /* Spinner color */
+    border-top: 3px solid #fff; /* Spinner color */
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }

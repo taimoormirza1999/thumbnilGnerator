@@ -444,7 +444,7 @@ function cardLoader(index) {
      <div class="thumbnail-centered-loader ">
       <div class="spinner-wrapper">
         <div class="spinner-circle"></div>  
-        <img src="icons/loading_imge.svg" alt="Loading" class="loading-icon">
+        <img src="assets/icons/loading_imge.svg" alt="Loading" class="loading-icon">
       </div>
     </div>
     `;
@@ -870,7 +870,7 @@ function renderReferenceImages(references, container) {
     container.innerHTML = '';
     
     if (!references || !Array.isArray(references) || references.length === 0) {
-        container.innerHTML = '<p class="empty-state">No reference images uploaded</p>';
+        container.innerHTML = '<p class="empty-state bg-gray-50 bg-opacity-20 text-white rounded">No reference images uploaded</p>';
         return;
     }
     
@@ -944,7 +944,7 @@ function renderTitlesList() {
     titleList.innerHTML = '';
     
     if (titles.length === 0) {
-        titleList.innerHTML = '<div class="empty-state">No titles yet. Create your first one!</div>';
+        titleList.innerHTML = '<div class="empty-state bg-gray-50 bg-opacity-20 text-white rounded">No titles yet. Create your first one!</div>';
         return;
     }
     
