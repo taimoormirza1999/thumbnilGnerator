@@ -5,66 +5,86 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Thumbnail Generator</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="spinner.css">
+
+    <!-- iziToast CSS & JS For Alerts & Notifications -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+
+    <!-- Custom CSS & JS -->
+    <script src="assets/custom.js"></script>
+    <link rel="stylesheet" href="assets/css/login_register.css">
+    <link rel="stylesheet" href="assets/css/optimize.css">
+
+
 </head>
 <body>
     <!-- Login/Register Container -->
-    <div id="login-container" style="display: block;">
+    <div id="login-container" style="display: block; background-color: rgba(27, 27, 27, 1); background-image: url('assets/images/bg-image.png');"  class="login-container bg-fixed bg-cover bg-center bg-no-repeat h-screen overflow-hidden"
+    >
+       <div class="login-container-content">
         <div class="auth-form-container">
-            <h1>AI Thumbnail Generator</h1>
+            <h1 class="text-2xl font-bold mb-4">AI Thumbnail Generator</h1>
             
             <!-- Login Form -->
             <form id="login-form">
-                <h2>Login</h2>
+                <h2 class="text-lg font-semibold mb-3">Login</h2>
                 <div class="input-group">
-                    <label for="login-email">Email:</label>
+                    <label for="login-email" class="block mb-2">Email:</label>
                     <input type="email" id="login-email" required>
                 </div>
                 <div class="input-group">
-                    <label for="login-password">Password:</label>
+                    <label for="login-password" class="block mb-2">Password:</label>
                     <input type="password" id="login-password" required>
                 </div>
-                <button type="submit" class="btn primary-btn">Login</button>
+                <button type="submit" class="btn primary-btn text-center w-full">Login</button>
                 <p>Don't have an account? <a href="#" id="show-register">Register</a></p>
             </form>
             
             <!-- Register Form -->
             <form id="register-form" style="display: none;">
-                <h2>Register</h2>
+                <h2 class="text-lg font-semibold mb-3">Register</h2>
                 <div class="input-group">
-                    <label for="register-username">Username:</label>
+                    <label for="register-username" class="block mb-2">Username:</label>
                     <input type="text" id="register-username" required>
                 </div>
                 <div class="input-group">
-                    <label for="register-email">Email:</label>
+                    <label for="register-email" class="block mb-2">Email:</label>
                     <input type="email" id="register-email" required>
                 </div>
                 <div class="input-group">
-                    <label for="register-password">Password:</label>
+                    <label for="register-password" class="block mb-2">Password:</label>
                     <input type="password" id="register-password" required>
                 </div>
                 <button type="submit" class="btn primary-btn">Register</button>
                 <p>Already have an account? <a href="#" id="show-login">Login</a></p>
             </form>
         </div>
+       </div>
     </div>
     
     <!-- App Container (Will be hidden until logged in) -->
     <div id="app-container" class="app-container" style="display: none;">
         <!-- Loading Overlay -->
         <div id="loading-overlay" class="loading-overlay">
-            <div class="spinner"></div>
-            <p>Loading...</p>
+            <!-- <div class="spinner"></div> -->
+            <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+            <p class="loading-text">Loading...</p>
         </div>
         
         <!-- Left Sidebar for Titles -->
-        <div class="sidebar">
+        <div class="sidebar ">
             <div class="sidebar-header">
-                <h2>Your Titles</h2>
-                <button id="new-title-btn" class="btn">+ New</button>
+                <h2 class="text-white font-bold text-xl">
+                    AITG
+                  </h2>
+                <button id="new-title-btn" class="btn bg-transparent p-0"><img src="icons/chat.svg" alt="Add" style="width:24px; height:24px; vertical-align:middle; margin-right:6px;"></button>
             </div>
             <div class="user-info">
-                <span id="username-display"></span>
-                <button id="logout-btn" class="btn small-btn">Logout</button>
+                <span id="username-display" class="text-white font-bold text-sm"></span>
+                <button id="logout-btn" class="btn bg-white rounded-full p-1.5 hover:bg-gray-200"><img src="icons/logout.svg" alt="Logout" style="width:24px; height:24px; vertical-align:middle;"></button>
             </div>
             <div class="title-list" id="title-list">
                 <!-- Titles will be populated here -->
@@ -91,7 +111,7 @@
                 <div class="global-references" id="global-references">
                     <div class="dropzone" id="global-dropzone">
                         <p>Drop reference images here or</p>
-                        <button class="btn" id="global-upload-btn">Upload</button>
+                        <button class="btn bg-transparent" id="global-upload-btn"><img src="/icons/upload.svg" alt="Upload" style="width:24px; height:24px; vertical-align:middle;"></button>
                         <input type="file" id="global-file-input" multiple accept="image/*" style="display: none;">
                     </div>
                     <div class="reference-images" id="global-reference-images">
@@ -125,7 +145,7 @@
                     <label for="quantity-select">Number of Thumbnails:</label>
                     <input type="number" id="quantity-select" min="1" max="10" value="5">
                 </div>
-                <button id="generate-btn" class="btn primary-btn">Generate Thumbnails</button>
+                <button id="generate-btn" class="btn primary-btn"><img src="icons/picture.svg" alt="Generate" style="width:24px; height:24px; vertical-align:middle; margin-right:6px;"> Generate Thumbnails</button>
             </div>
 
             <!-- Generation Progress -->
@@ -146,13 +166,13 @@
 
             <!-- Thumbnails Results -->
             <div class="thumbnails-section">
-                <h3>Generated Thumbnails</h3>
+                <h3 class="text-lg font-semibold mb-3">Generated Thumbnails</h3>
                 <div class="thumbnails-grid" id="thumbnails-grid">
                     <!-- Thumbnails will be displayed here -->
                     <div class="empty-state" id="thumbnails-empty-state">No thumbnails generated yet.</div>
                 </div>
                 <div class="more-thumbnails-section" id="more-thumbnails-section" style="display: none;">
-                    <button id="more-thumbnails-btn" class="btn primary-btn">Generate More Thumbnails</button>
+                    <button id="more-thumbnails-btn" class="btn primary-btn"><img src="icons/picture.svg" alt="Generate" style="width:24px; height:24px; vertical-align:middle; margin-right:6px;">Generate More Thumbnails</button>
                 </div>
             </div>
         </div>
@@ -163,7 +183,7 @@
         <div class="modal-content">
          
             <div class="modal-header">
-                <h3 id="modal-title">Thumbnail Prompt Details</h3>
+                <h3 id="modal-title" class="text-xl font-bold">Thumbnail Prompt Details</h3>
                 <span class="close-modal">&times;</span>
             </div>
             <div class="modal-body">
@@ -171,23 +191,30 @@
                     <img id="modal-image" src="" alt="Thumbnail Preview">
                 </div>
                 <div class="prompt-details">
-                    <h4>Prompt Summary</h4>
+                    <h4 class="text-lg font-bold">Prompt Summary</h4>
                     <p id="prompt-summary"></p>
                     
-                    <h4>Title</h4>
+                    <h4 class="text-lg font-bold">Title</h4>
                     <p id="prompt-title"></p>
                     
-                    <h4>Custom Instructions</h4>
+                    <h4 class="text-lg font-bold">Custom Instructions</h4>
                     <p id="prompt-instructions"></p>
                     
-                    <h4>Context Used</h4>
+                    <h4 class="text-lg font-bold">Context Used</h4>
                     <div id="prompt-context">
                         <p><strong>References:</strong> <span id="reference-count">0</span> images used</p>
                         <div id="reference-thumbnails" class="reference-thumbnails"></div>
                     </div>
                     
-                    <h4>Full Prompt</h4>
+                   <div class="full-prompt-container">
+                    <div class="prompt-header">
+                        <h4 class="text-lg font-bold">Full Prompt</h4>
+                    </div>
+                    <div class="prompt-content">
                     <pre id="full-prompt" class="full-prompt"></pre>
+                    <button class="copy-btn"><img src="/icons/copy.svg" alt="Copy" style="width:30px; height:30px; vertical-align:middle; margin-right:6px;"></button>
+                    </div>
+                   </div>
                 </div>
             </div>
         </div>

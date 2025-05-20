@@ -1,0 +1,319 @@
+
+@use "sass:map";
+$breakpoints: (
+  mobileS: 320px,
+  mobileM: 375px,
+  mobileL: 425px,
+  tablet: 768px,
+  laptop: 1080px,
+  large: 1200px,
+  desktop: 1440px,
+  desktop1920: 1920px,
+  desktop2560: 2560px,
+);
+@function _get-bp($val) {
+  @if $val != null and map.has-key($breakpoints, $val) {
+    @return map-get($breakpoints, $val);
+  } @else {
+    @return $val;
+  }
+}
+
+$text-sizes: (
+  xs-1: 0.7rem,
+  xs: 0.75rem,
+  // text-xs
+  sm-0: 0.78rem,
+  sm: 0.875rem,
+  // text-sm
+  sm-1: 0.92rem,
+  // text-sm
+  base: 1rem,
+  // text-base (you can skip if you like)
+  lg: 1.125rem,
+  // text-lg
+  xl: 1.25rem,
+  // text-xl
+  xl-1: 1.375rem,
+  // text-xl-1
+  xl-2: 1.5rem,
+  // text-xl-2
+  xl-3: 1.75rem,
+  // text-xl-3
+  xl-4: 2rem,
+  // text-xl-4
+);
+@mixin text-dynamic($size) {
+  @if $size == xs {
+    font-size: 0.7rem !important;
+  }
+  @if $size == xs-1 {
+    font-size: 0.75rem !important;
+  }
+    @if $size == sm-0 {
+      font-size: 0.78rem !important;
+    }
+    @if $size == sm {
+      font-size: 0.875rem !important;
+    }
+  @if $size == sm-1 {
+    font-size: 0.92rem !important;
+  }
+  @if $size == base {
+    font-size: 1rem !important;
+  }
+  @if $size == xl {
+    font-size: 1.25rem !important;
+  }
+  @if $size == xl-1 {
+    font-size: 1.375rem !important;
+  }
+  @if $size == xl-2 {
+    font-size: 1.5rem !important;
+  }
+}
+@each $name, $size in $text-sizes {
+  .text-#{$name} {
+    font-size: $size !important;
+    // optionally match Tailwind's line-height
+    @if $name == xs {
+      line-height: 1rem !important;
+    } @else if $name == sm {
+      line-height: 1.25rem !important;
+    } @else if $name == base {
+      line-height: 1.5rem !important;
+    }
+  }
+}
+
+// Geist Font Map
+// $geist-fonts: (
+//   100: "Thin",
+//   200: "UltraLight",
+//   400: "Regular",
+//   500: "Medium",
+//   700: "Bold",
+//   900: "Black",
+// );
+
+// @each $weight, $suffix in $geist-fonts {
+//   @font-face {
+//     font-family: "Geist";
+//     src: url("../fonts/Geist-#{$suffix}.woff2") format("woff2");
+//     font-weight: #{$weight};
+//     font-style: normal;
+//   }
+// }
+// // CabinetGrotesk Fonts - Direct declarations without nth()
+// @font-face {
+//   font-family: "CabinetGroteskBold";
+//   src: url("../fonts/CabinetGrotesk-Bold.woff2") format("woff2");
+//   font-weight: 700;
+//   font-style: normal;
+// }
+// @font-face {
+//   font-family: "CabinetGroteskLight";
+//   src: url("../fonts/CabinetGrotesk-Regular.woff2") format("woff2");
+//   font-weight: 400;
+//   font-style: normal;
+// }
+
+// Utility Classes
+// .font-primary {
+//   font-family: "Geist", sans-serif !important;
+// }
+// .font-primary-bold {
+//   font-family: "Geist-Bold", sans-serif !important;
+// }
+// .font-secondaryBold {
+//   font-family: "CabinetGroteskBold", sans-serif !important;
+// }
+// .font-secondaryLight {
+//   font-family: "CabinetGroteskLight", sans-serif !important;
+// }
+
+
+
+// ===============================
+// 2) FONTS
+
+@mixin media-range($min: null, $max: null) {
+  // resolve names → px (or leave raw if not in map)
+  $min-resolved: if($min != null, _get-bp($min), null);
+  $max-resolved: if($max != null, _get-bp($max), null);
+
+  @if $min-resolved != null and $max-resolved != null {
+    @media (min-width: $min-resolved) and (max-width: $max-resolved) {
+      @content;
+    }
+  } @else if $min-resolved != null {
+    @media (min-width: $min-resolved) {
+      @content;
+    }
+  } @else if $max-resolved != null {
+    @media (max-width: $max-resolved) {
+      @content;
+    }
+  } @else {
+    @warn "media-range: you passed neither $min nor $max!";
+  }
+}
+
+@mixin flex-center-hv($justify-content: center, $align-items: center, $gap: 'auto') {
+  display: flex;
+  justify-content: $justify-content;
+  align-items: $align-items;
+  gap: $gap;
+}
+@mixin flex-center-hv-column($justify-content: center, $align-items: center, $gap: 'auto') {
+  display: flex;
+  flex-direction: column;
+  justify-content: $justify-content;
+  align-items: $align-items;
+  gap: $gap;
+}
+@mixin button-icon-only {
+  height: $icon-height;
+  width: $icon-width;
+}
+
+.hover-up {
+  transition: all $transition-duration-34 ease-in-out;
+  &:hover {
+    transform: translateY(-5px);
+  }
+}
+
+@mixin default-bodyimage {
+  background-image: $bg-img1-black;
+  background-size: cover !important;
+  background-position: top !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+  overflow-y: hidden !important;
+  overflow-x: hidden;
+}
+
+// @mixin button-common($text-size: sm-1, $height: $button-height, $height-mobile: $button-height-mobile) {
+//   height: $height;
+//   @include text-dynamic($text-size);
+//   @include media-range(mobileS, mobileL){
+//     height: $height-mobile;
+//     @include text-dynamic($text-size);
+//   }
+// }
+
+// iziTOAST
+.iziToast.custom-toast-style {
+  border-radius: 16px !important;
+  padding: clamp(0.85rem, 1vw, 1.1rem) clamp(0.5rem, 1vw, 0.875rem) !important;
+  @include media-range(mobileS, mobileL) {
+    width: auto !important;
+  }
+  .iziToast-body {
+    margin: 0 !important;
+  }
+  .iziToast-buttons button {
+    @include text-dynamic(xs);
+  }
+}
+.container-fluid.pb-3 {
+  padding-bottom: 0rem !important;
+  @include media-range(mobileS, mobileL) {
+    padding-bottom: 1rem !important;
+  }
+}
+
+
+
+// #mobileMenuContainer {
+//   transform: translateX(100%); /* Hidden off-screen to the right */
+//   position: fixed;
+//   top: 0;
+//   right: 0;
+//   width: 100%;
+//   height: 100%;
+//   z-index: 9999;
+//   transition: none;
+//   backdrop-filter: blur(16px);
+//   background: rgb(18 18 18 / 57%);
+//   }
+
+//   .mobile-menu-container.active {
+//       display: block !important;
+//   }
+
+//   .mobile-menu-content {
+//       position: relative;
+//       width: 100%;
+//       height: 100%;
+//       z-index: 1000000;
+//       padding: 1rem;
+//   }
+
+//   .mobile-menu-header {
+//       display: flex;
+//       justify-content: space-between;
+//       align-items: flex-start;
+//       padding: 0.8rem;
+//       margin-top: 0.3rem;
+//   }
+
+  
+ 
+//   .close-menu-btn {
+//       background: none;
+//       border: none;
+//       color: white;
+//       padding: 0;
+//       font-size: 1.5rem;
+//       cursor: pointer;
+//   }
+
+//   .mobile-menu-items {
+//       list-style: none;
+//       padding: 0 1.5rem;
+//       margin: 0;
+//   }
+
+//   .mobile-menu-items li {
+//       border-width: 1px solid rgba(255, 255, 255, 0.5);
+//       border-radius: 12px;
+//       overflow: hidden;
+//   }
+// .mobile-menu-items li a,
+// .mobile-menu-items li .logout-btn {
+//   @extend .text-sm-1;
+//   @extend .font-secondaryBold;
+//   color: white;
+//   text-decoration: none;
+//   display: flex;
+//   align-items: center;
+//   gap: 0.8rem;
+//   padding: 1.25rem 0;
+//   width: 100%;
+//   background: transparent;
+//   border: none;
+// }
+// .user-profile {
+//   text-decoration: none;
+//   display: flex;
+//   align-items: center;
+//   gap: 1rem;
+//   h5 {
+//     @extend .text-base;
+//     @extend .font-secondaryBold;
+//     color: white;
+//     text-decoration: none;
+//   }
+//   .profile-image{
+//     width: 3.5rem;
+//     height: 3.5rem;
+//     border-radius: 50%;
+//     object-fit: cover;
+//     border: 1.6px solid rgba(248, 249, 250, 0.5);
+//   }
+// }
+// .border-bottom-primary{
+//   border-bottom: 0.09rem solid $white-color-20!important;
+// }

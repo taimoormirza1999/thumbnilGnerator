@@ -1,0 +1,40 @@
+@import "variables";
+@import "utils";
+
+.login-container {
+    position: relative;
+    .login-container-content{
+        position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 70%;
+          max-width: 550px;
+          transform: translate(-50%, -50%);
+        .auth-form-container{
+            width: 98%;
+              margin: 0.4rem auto;
+              background: white!important;
+              padding: 25px;
+              padding-top: 60px;
+              border-radius: 10px;
+              box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+              text-align: center;
+              z-index: 11;
+              &::before{
+                  padding: 3rem;
+                  height: 100%;
+                  width: 100%;
+                  border-radius: 10px;
+                  position: absolute;
+                  top: 0;
+                  left: 0;
+                  content: '';
+                  z-index: -99;
+                  background: linear-gradient(142.31deg, #736EFF 0.94%, #FF7438 99.06%);;
+        
+        
+              }
+          }
+    }
+
+  }

@@ -1,7 +1,8 @@
 import axios from 'https://cdn.jsdelivr.net/npm/axios@1.3.5/+esm';
-
+   // Add this at the top of apiService.js
+   let preventReload = false;
 // Use the full server address with port where your backend is running
-const API_URL = 'http://192.168.70.22:5002/api';
+const API_URL = 'http://192.168.70.26:5002/api';
 
 // Create axios instance with auth token
 const api = axios.create({
@@ -9,7 +10,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json'
   },
-  timeout: 300000 // Add timeout to avoid long waits on network issues
+  timeout: 20000 // Default timeout for most requests
 });
 
 // Add auth token to requests if available
@@ -18,6 +19,12 @@ api.interceptors.request.use(config => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  // Set longer timeout for thumbnail generation specifically
+  if (config.url === '/thumbnails/generate') {
+    config.timeout = 120000; // 2 minutes for thumbnail generation
+  }
+  
   return config;
 });
 
@@ -39,12 +46,44 @@ export const uploadReference = (titleId, imageData, isGlobal = false) =>
 export const getReferences = (titleId) => api.get(`/references/${titleId}`);
 export const getGlobalReferences = () => api.get('/references/global');
 export const deleteReference = (id) => api.delete(`/references/${id}`);
-
+// Regenerate thumbnail endpoint
+export const regenerateThumbnail = (titleId, thumbnailId) => 
+  api.post('/thumbnails/regenerate', { titleId, thumbnailId });
 // Thumbnail endpoints
 export const generateThumbnails = (titleId, quantity = 5) => 
-  api.post('/thumbnails/generate', { titleId, quantity });
-export const getThumbnails = (titleId) => api.get(`/thumbnails/${titleId}`);
-export const getThumbnailsBatch = (titleId, start = 0, limit = 5) =>
-  api.get(`/thumbnails/batch/${titleId}`, { params: { start, limit } });
+  api.post('/thumbnails/generate', { titleId, quantity })
+    .catch(error => {
+      // If it's a timeout error, the server might still be processing
+      // We'll throw a special error object for this case
+      if (error.code === 'ECONNABORTED') {
+        console.log('Thumbnail generation request timed out, but the server might still be processing it.');
+        const timeoutError = new Error('Thumbnail generation request timed out, but the server might still be processing it.');
+        timeoutError.isProcessingTimeout = true;
+        timeoutError.titleId = titleId;
+        timeoutError.quantity = quantity;
+        throw timeoutError;
+      }
+      throw error;
+    });
+export const getThumbnails = async (titleId) => {
+  // Add this check
+  if (preventReload) {
+    console.log("Prevented API call to avoid reload");
+    return { data: { thumbnails: [] } };
+  }
   
+  // Original code continues...
+  const response = await api.get(`/thumbnails/${titleId}`);
+  return response;
+};
+
 export default api; 
+
+// Near your getThumbnails function
+setInterval(() => {
+  // Check global flag set by app.js
+  if (window.preventReload !== undefined) {
+    preventReload = window.preventReload;
+  }
+}, 100); 
+

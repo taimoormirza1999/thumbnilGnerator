@@ -1,7 +1,8 @@
 const { pool } = require('../database');
 const openRouterService = require('../services/openRouterService');
 const openAIService = require('../services/openAIService');
-
+const ThumbnailDispatcher = require('../services/ThumbnailDispatcher');
+const MAX_PARALLEL = 5;
 // Generate thumbnail ideas (parallel processing)
 async function generateThumbnails(req, res) {
   if (!req.user || !req.user.id) {
@@ -10,7 +11,6 @@ async function generateThumbnails(req, res) {
   }
 
   const { titleId, quantity = 5 } = req.body;
-  const MAX_PARALLEL = 5;
   
   if (!titleId) {
     return res.status(400).json({ error: 'Title ID is required' });
@@ -48,7 +48,12 @@ async function generateThumbnails(req, res) {
     );
     
     const references = refRows.map(row => ({ id: row.id, image_data: row.image_data }));
-    
+    const dispatcher = new ThumbnailDispatcher({
+      maxParallel: MAX_PARALLEL,
+      pool,
+      openAIService,
+      references
+    });
     // Get previous ideas for this title to avoid duplication
     const prevParams = [titleId];
     if (prevParams.some(p => p === undefined)) {
@@ -71,18 +76,18 @@ async function generateThumbnails(req, res) {
         [...prevIdeas, ...newIdeas] // Include previously generated ideas to avoid repetition
       );
       newIdeas.push(idea);
-      
+      dispatcher.enqueue(idea);
       // Create thumbnail entry in processing state
-      const thumbnailParams = [titleId, idea.id, 'pending'];
-      if (thumbnailParams.some(p => p === undefined)) {
-        console.error('Attempted to execute query with undefined parameter:', { thumbnailParams });
-        return res.status(500).json({ error: 'Internal server error: Invalid query parameter detected' });
-      }
+      // const thumbnailParams = [titleId, idea.id, 'pending'];
+      // if (thumbnailParams.some(p => p === undefined)) {
+      //   console.error('Attempted to execute query with undefined parameter:', { thumbnailParams });
+      //   return res.status(500).json({ error: 'Internal server error: Invalid query parameter detected' });
+      // }
       
-      await pool.execute(
-        'INSERT INTO thumbnails (title_id, idea_id, status) VALUES (?, ?, ?)',
-        thumbnailParams
-      );
+      // await pool.execute(
+      //   'INSERT INTO thumbnails (title_id, idea_id, status) VALUES (?, ?, ?)',
+      //   thumbnailParams
+      // );
     }
     
     // Start image generation in parallel (respecting MAX_PARALLEL limit)
@@ -127,6 +132,84 @@ async function generateThumbnails(req, res) {
   }
 }
 
+
+async function regenerateThumbnail(req, res) {
+  if (!req.user || !req.user.id) {
+    console.error('User not authenticated properly');
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  const { titleId, thumbnailId } = req.body;
+  
+  if (!thumbnailId || !titleId) {
+    return res.status(400).json({ error: 'Both Title ID and Thumbnail ID are required' });
+  }
+  
+  try {
+    // Get the existing thumbnail and its corresponding idea
+    const [thumbnailRows] = await pool.execute(
+      'SELECT t.id, t.title_id, i.id as idea_id, i.summary, i.full_prompt as fullPrompt ' +
+      'FROM thumbnails t ' +
+      'JOIN ideas i ON t.idea_id = i.id ' +
+      'WHERE t.id = ?',
+      [thumbnailId]
+    );
+    
+    if (thumbnailRows.length === 0) {
+      return res.status(404).json({ error: 'Thumbnail not found' });
+    }
+    
+    const thumbnail = thumbnailRows[0];
+    const ideaId = thumbnail.idea_id;
+    
+    // Get reference images (same as in generateThumbnails)
+    const [refRows] = await pool.execute(
+      'SELECT id, image_data FROM references2 WHERE title_id = ? OR (user_id = ? AND is_global = 1)',
+      [titleId, req.user.id]
+    );
+    
+    const references = refRows.map(row => ({ id: row.id, image_data: row.image_data }));
+    
+    // Create a dispatcher with just one item
+    const dispatcher = new ThumbnailDispatcher({
+      maxParallel: 1, // Only one item to process
+      pool,
+      openAIService,
+      references
+    });
+    
+    // Update thumbnail status to processing
+    await pool.execute(
+      'UPDATE thumbnails SET status = ?, image_url = NULL WHERE id = ?',
+      ['processing', thumbnailId]
+    );
+    
+    // Use the existing idea but regenerate the image
+    const idea = {
+      id: ideaId,
+      fullPrompt: thumbnail.fullPrompt,
+      summary: thumbnail.summary,
+      titleId: titleId // Add titleId which is required by the dispatcher
+    };
+    
+    // Enqueue the idea - this will automatically start processing
+    await dispatcher.enqueue(idea, true);
+    
+    // Return immediately
+    res.status(200).json({
+      message: `Started regenerating thumbnail ${thumbnailId}`,
+      thumbnail: {
+        id: thumbnailId,
+        status: 'processing',
+        title_id: titleId,
+        summary: thumbnail.summary
+      }
+    });
+  } catch (error) {
+    console.error('Error in regenerateThumbnail:', error);
+    res.status(500).json({ error: 'Failed to regenerate thumbnail: ' + error.message });
+  }
+}
 // Get status of all thumbnails for a title
 async function getThumbnails(req, res) {
   if (!req.user || !req.user.id) {
@@ -280,122 +363,8 @@ async function getThumbnails(req, res) {
     res.status(500).json({ error: `Failed to get thumbnails: ${error.message}` });
   }
 }
-
-async function getThumbnailsBatch(req, res) {
-  const functionStart = Date.now();
-
-  // 1) Auth check
-  if (!req.user || !req.user.id) {
-    return res.status(401).json({ error: 'Authentication required' });
-  }
-
-  // 2) Parse & sanitize params
-  const titleId = req.params.titleId;
-  const start = Math.max(0, parseInt(req.query.start, 10) || 0);
-  const limit = Math.max(1, parseInt(req.query.limit, 10) || 5);
-
-  if (!titleId) {
-    return res.status(400).json({ error: 'Missing titleId' });
-  }
-
-  try {
-    // Optimized query that combines title check and data fetch
-    const thumbnailQuery = `
-      SELECT 
-        t.id, t.idea_id, t.image_url, t.status, t.error_message,
-        t.used_reference_ids,
-        i.summary, i.full_prompt AS fullPrompt,
-        titles.title AS titleText,
-        titles.instructions AS titleInstructions
-      FROM thumbnails t
-      JOIN ideas i ON t.idea_id = i.id
-      JOIN titles ON t.title_id = titles.id
-      WHERE t.title_id = ?
-      ORDER BY t.id ASC
-      LIMIT ?, ?
-    `;
-
-    // Execute main query
-    const [rows] = await pool.execute(thumbnailQuery, [titleId, start, limit]);
-    
-    if (rows.length === 0) {
-      return res.json({ thumbnails: [], referenceDataMap: {} });
-    }
-
-    // Efficiently process reference IDs
-    const refIdSet = new Set();
-    const thumbnails = rows.map((row, idx) => {
-      // Process reference IDs while mapping
-      if (row.used_reference_ids) {
-        try {
-          JSON.parse(row.used_reference_ids)
-            .filter(id => id != null)
-            .forEach(id => refIdSet.add(id));
-        } catch {}
-      }
-
-      return {
-        id: row.id,
-        idea_id: row.idea_id,
-        image_url: row.image_url,
-        status: row.status,
-        error_message: row.error_message || '',
-        summary: row.summary,
-        promptDetails: {
-          summary: row.summary,
-          title: row.titleText,
-          instructions: row.titleInstructions,
-          referenceCount: 0, // Will be updated if references exist
-          referenceImages: [], // Will be filled if references exist
-          fullPrompt: row.fullPrompt
-        },
-        index: start + idx
-      };
-    });
-
-    // Only fetch references if we have any
-    let referenceDataMap = {};
-    if (refIdSet.size > 0) {
-      const refIds = Array.from(refIdSet);
-      const placeholders = refIds.map(() => '?').join(',');
-      const [refs] = await pool.execute(
-        `SELECT id, image_data FROM references2 WHERE id IN (${placeholders})`,
-        refIds
-      );
-      
-      // Build reference map
-      refs.forEach(r => {
-        referenceDataMap[r.id] = r.image_data;
-      });
-
-      // Update thumbnail reference counts
-      thumbnails.forEach(thumb => {
-        const rowData = rows.find(r => r.id === thumb.id);
-        if (rowData?.used_reference_ids) {
-          try {
-            const usedRefs = JSON.parse(rowData.used_reference_ids)
-              .filter(id => referenceDataMap[id]);
-            thumb.promptDetails.referenceImages = usedRefs;
-            thumb.promptDetails.referenceCount = usedRefs.length;
-          } catch {}
-        }
-      });
-    }
-
-    console.log(
-      `getThumbnailsBatch(${titleId}) [${start}…${start+limit-1}] → ${thumbnails.length} rows in ${Date.now()-functionStart}ms`
-    );
-    
-    return res.json({ thumbnails, referenceDataMap });
-
-  } catch (err) {
-    console.error('getThumbnailsBatch error:', err);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
-}
-
 module.exports = {
   generateThumbnails,
   getThumbnails,
-  getThumbnailsBatch
+  regenerateThumbnail
 }; 

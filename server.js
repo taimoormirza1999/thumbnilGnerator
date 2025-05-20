@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 // const { initializeDatabase } = require('./database');
-const { initializeDatabase_railway } = require('./databaserailway');
 const authRoutes = require('./routes/auth');
 const titleRoutes = require('./routes/titles');
 const thumbnailRoutes = require('./routes/thumbnails');
@@ -34,6 +33,16 @@ app.get('/test', (req, res) => {
 });
 
 // Initialize database and start server
+// initializeDatabase()
+//   .then(() => {
+//     app.listen(PORT, () => {
+//       console.log(`Server running on port ${PORT}`);
+//     });
+//   })
+//   .catch(err => {
+//     console.error('Failed to start server:', err);
+//     process.exit(1);
+//   }); 
 // initializeDatabase()
 //   .then(() => {
 //     app.listen(PORT, () => {
