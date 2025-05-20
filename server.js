@@ -24,10 +24,15 @@ app.use('/api/thumbnails', thumbnailRoutes);
 app.use('/api/references', referenceRoutes);
 
 // Root route
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.json({ message: 'AI Thumbnail Generator API' });
 });
+app.use(express.static(path.join(__dirname, "frontend")));
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 
 // Initialize database and start server
 

@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Thumbnail Generator</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="spinner.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/spinner.css">
 
     <!-- iziToast CSS & JS For Alerts & Notifications -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css">
@@ -80,11 +80,11 @@
                 <h2 class="text-white font-bold text-xl">
                     AITG
                   </h2>
-                <button id="new-title-btn" class="btn bg-transparent p-0"><img src="icons/chat.svg" alt="Add" style="width:24px; height:24px; vertical-align:middle; margin-right:6px;"></button>
+                <button id="new-title-btn" class="btn bg-transparent p-0"><img src="assets/icons/chat.svg" alt="Add" style="width:24px; height:24px; vertical-align:middle; margin-right:6px;"></button>
             </div>
             <div class="user-info">
                 <span id="username-display" class="text-white font-bold text-sm"></span>
-                <button id="logout-btn" class="btn bg-white rounded-full p-1.5 hover:bg-gray-200"><img src="icons/logout.svg" alt="Logout" style="width:24px; height:24px; vertical-align:middle;"></button>
+                <button id="logout-btn" class="btn bg-white rounded-full p-1.5 hover:bg-gray-200"><img src="assets/icons/logout.svg" alt="Logout" style="width:24px; height:24px; vertical-align:middle;"></button>
             </div>
             <div class="title-list" id="title-list">
                 <!-- Titles will be populated here -->
@@ -111,7 +111,7 @@
                 <div class="global-references" id="global-references">
                     <div class="dropzone" id="global-dropzone">
                         <p>Drop reference images here or</p>
-                        <button class="btn bg-transparent" id="global-upload-btn"><img src="/icons/upload.svg" alt="Upload" style="width:24px; height:24px; vertical-align:middle;"></button>
+                        <button class="btn bg-transparent" id="global-upload-btn"><img src="/assets/icons/upload.svg" alt="Upload" style="width:24px; height:24px; vertical-align:middle;"></button>
                         <input type="file" id="global-file-input" multiple accept="image/*" style="display: none;">
                     </div>
                     <div class="reference-images" id="global-reference-images">
@@ -145,7 +145,7 @@
                     <label for="quantity-select">Number of Thumbnails:</label>
                     <input type="number" id="quantity-select" min="1" max="10" value="5">
                 </div>
-                <button id="generate-btn" class="btn primary-btn"><img src="icons/picture.svg" alt="Generate" style="width:24px; height:24px; vertical-align:middle; margin-right:6px;"> Generate Thumbnails</button>
+                <button id="generate-btn" class="btn primary-btn"><img src="assets/icons/picture.svg" alt="Generate" style="width:24px; height:24px; vertical-align:middle; margin-right:6px;"> Generate Thumbnails</button>
             </div>
 
             <!-- Generation Progress -->
@@ -172,7 +172,7 @@
                     <div class="empty-state" id="thumbnails-empty-state">No thumbnails generated yet.</div>
                 </div>
                 <div class="more-thumbnails-section" id="more-thumbnails-section" style="display: none;">
-                    <button id="more-thumbnails-btn" class="btn primary-btn"><img src="icons/picture.svg" alt="Generate" style="width:24px; height:24px; vertical-align:middle; margin-right:6px;">Generate More Thumbnails</button>
+                    <button id="more-thumbnails-btn" class="btn primary-btn"><img src="assets/icons/picture.svg" alt="Generate" style="width:24px; height:24px; vertical-align:middle; margin-right:6px;">Generate More Thumbnails</button>
                 </div>
             </div>
         </div>
@@ -212,7 +212,7 @@
                     </div>
                     <div class="prompt-content">
                     <pre id="full-prompt" class="full-prompt"></pre>
-                    <button class="copy-btn"><img src="/icons/copy.svg" alt="Copy" style="width:30px; height:30px; vertical-align:middle; margin-right:6px;"></button>
+                    <button class="copy-btn"><img src="/assets/icons/copy.svg" alt="Copy" style="width:30px; height:30px; vertical-align:middle; margin-right:6px;"></button>
                     </div>
                    </div>
                 </div>
@@ -220,6 +220,6 @@
         </div>
     </div>
 
-    <script src="app.js" type="module"></script>
+    <script src="assets/app.js" type="module"></script>
 </body>
 </html> 
