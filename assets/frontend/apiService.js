@@ -2,7 +2,7 @@ import axios from 'https://cdn.jsdelivr.net/npm/axios@1.3.5/+esm';
    // Add this at the top of apiService.js
    let preventReload = false;
 // Use the full server address with port where your backend is running
-const API_URL = process.env.FRONTEND_URL;
+const API_URL = 'https://thumbnilgnerator.onrender.com/api';
 
 // Create axios instance with auth token
 const api = axios.create({
@@ -86,12 +86,4 @@ setInterval(() => {
     preventReload = window.preventReload;
   }
 }, 100); 
-
-const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-
-// Validate the URL
-if (!frontendUrl.startsWith('http://') && !frontendUrl.startsWith('https://')) {
-  console.error('Invalid FRONTEND_URL in environment variables');
-  process.exit(1);
-} 
 
