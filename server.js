@@ -11,6 +11,16 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.get('/env.js', (req, res) => {
+  res.type('application/javascript')
+  res.send(`
+    window.__ENV__ = {
+      API_URL: "${process.env.API_URL}",
+      OTHER_FLAG: "${process.env.OTHER_FLAG||''}"
+    };
+  `)
+})
+
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));

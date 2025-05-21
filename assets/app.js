@@ -6,7 +6,9 @@ import {
   generateThumbnails, getThumbnails, regenerateThumbnail
 } from './frontend/apiService.js';
 // const SERVER_BASE_URL = 'http://localhost:3002'
-const SERVER_BASE_URL = 'https://thumbnilgnerator.onrender.com'
+const { API_URL, OTHER_FLAG } = window.__ENV__
+const SERVER_BASE_URL = API_URL
+
 // Simulated Server API
 const ServerAPI = {
     // Simulated server data storage (In a real app, this would be on the server)
