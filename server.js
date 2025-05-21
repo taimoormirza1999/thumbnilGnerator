@@ -45,15 +45,15 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// Initialize database and start server
-
-initializeDatabase()
-  .then(() => {
+async function start() {
+  try {
+    await initializeDatabase();          // ← called exactly once
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
-  })
-  .catch(err => {
+  } catch (err) {
     console.error('Failed to start server:', err);
     process.exit(1);
-  }); 
+  }
+}
+start();

@@ -1359,16 +1359,10 @@ async function pollThumbnailStatus(titleId, expectedQuantity, attempt = 0, batch
     // }
     
     console.log(`[Poll #${attempt + 1}] Polling for thumbnails for title ${titleId}`);
-    const maxAttempts = 60; // Poll for up to 3 minutes (60 * 3s)
+    const maxAttempts = 40*expectedQuantity; // Poll for up to 3 minutes (60 * 3s)
     const pollInterval = 3000; // Poll every 3 seconds
     const backoffFactor = 1.5; // Increase interval time after errors
 
-    // If we've reached the maximum number of attempts, stop polling
-    // if (attempt >= maxAttempts) {
-    //     console.warn(`[Poll] Reached maximum number of attempts (${maxAttempts})`);
-    //     finishPolling(titleId, "Polling timed out - the server might still be processing your request. Check back later.", batchId);
-    //     return;
-    // }
     console.log('***********pollThumbnailStatus***********');
     console.log(`[Poll #${attempt + 1}] Polling for thumbnails for title ${titleId}`);
     try {
@@ -1808,14 +1802,14 @@ function regenerateSingleThumbnail(index, thumbnailId) {
 }
 
 // New function to poll for a single thumbnail status
-function pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt = 0, status='starting') {
-    const maxAttempts = 41; // Poll for up to 90 seconds
+function pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt = 0) {
+    const maxAttempts = 41*2; // Poll for up to 90 seconds
     const pollInterval = 3000; // Poll every 3 seconds
-    console.log('***********pollSingleThumbnailStatus***********');
+    console.log('***********pollSingle Thumbnail Status Regeneration***********');
     console.log(`[Poll #${attempt + 1}] Polling for single thumbnail ${thumbnailId}`);
     
     if (attempt >= maxAttempts) {
-        console.warn(`Reached maximum polling attempts for thumbnail ${thumbnailId} and thumbnail status: ${status}`);
+        console.warn(`Reached maximum polling attempts for thumbnail ${thumbnailId} `);
         renderErrorThumbnail('Regeneration timed out', index, thumbnailId);
         preventPageReloads = false;
         window.preventReload = false;
@@ -1831,12 +1825,17 @@ function pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt = 0, sta
             if (!thumbnail) {
                 console.warn(`Thumbnail ${thumbnailId} not found in response`);
                 setTimeout(() => {
-                    pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt + 1, thumbnails.status);
+                    pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt + 1);
                 }, pollInterval);
                 return;
             }
+            console.log('***********Im in pollSingleThumbnailStatus function get thumbnail funtion***********');
+            console.log(thumbnail);
             
             if (thumbnail.status === 'completed') {
+                console.log('Im in completed pool thubnil status fucntion' );
+                const loader = document.getElementById(`thumb-${index}`);
+                loader.remove();
                 // Update the thumbnail in the current title
                 if (currentTitle && currentTitle.thumbnails) {
                     const thumbnailIndex = currentTitle.thumbnails.findIndex(t => t.id === thumbnailId);
@@ -1858,7 +1857,7 @@ function pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt = 0, sta
             } else {
                 // Still processing, poll again
                 setTimeout(() => {
-                    pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt + 1, thumbnail.status);
+                    pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt + 1);
                 }, pollInterval);
             }
         })
@@ -1866,7 +1865,7 @@ function pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt = 0, sta
             console.error('Error polling thumbnail status:', error);
             // Try again with backoff
             setTimeout(() => {
-                pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt + 1, 'failed');
+                pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt + 1);
             }, pollInterval * Math.min(2, attempt/5 + 1));
         });
 }
