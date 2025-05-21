@@ -497,7 +497,9 @@ input:focus, textarea:focus{
     .main-content {
         padding: 0.8rem;
         margin-left: 0px;
-       
+        border-top-left-radius: 12px !important;
+        border-top-right-radius: 12px !important;
+        border-top: 0.25rem groove var(--primary-color) !important;
     }    
     .app-container {
         flex-direction: column;
