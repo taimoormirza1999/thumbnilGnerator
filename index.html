@@ -132,19 +132,21 @@
             </div>
 
             <!-- Title Input Area -->
-            <div class="title-input-section">
-                <h3>Create Thumbnails</h3>
-                <div class="input-group">
-                    <label for="title-input">Title:</label>
-                    <input type="text" id="title-input" placeholder="Enter your title here...">
+            <div class="title-input-section bg-pink-500/20">
+                <h3 class="text-base font-semibold mb-2">Create Thumbnails</h3>
+                <div class="flex flex-col gap-2 md:flex-row">
+                    <div class="input-group w-full md:w-1/2">
+                        <label for="title-input" class="font-semibold text-sm">Title:</label>
+                        <input type="text" id="title-input" placeholder="Enter your title here...">
+                    </div>
+                    <div class="input-group w-full md:w-1/2">
+                        <label for="quantity-select" class="font-semibold text-sm">Number of Thumbnails:</label>
+                        <input type="number" id="quantity-select" min="1" max="10" value="5">
+                    </div>
                 </div>
                 <div class="input-group">
-                    <label for="custom-instructions">Custom Instructions:</label>
+                    <label for="custom-instructions" class="font-semibold text-sm">Custom Instructions:</label>
                     <textarea id="custom-instructions" placeholder="Enter custom instructions for AI (e.g., 'Minimalist design with pastel colors', 'Vintage comic book style', etc.)"></textarea>
-                </div>
-                <div class="input-group">
-                    <label for="quantity-select">Number of Thumbnails:</label>
-                    <input type="number" id="quantity-select" min="1" max="10" value="5">
                 </div>
                 <button id="generate-btn" class="btn primary-btn"><img src="assets/icons/picture.svg" alt="Generate" style="width:24px; height:24px; vertical-align:middle; margin-right:6px;"> Generate Thumbnails</button>
             </div>

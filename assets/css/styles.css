@@ -175,6 +175,8 @@ input:checked + .slider {
 input:checked + .slider:before {
     transform: translateX(26px);
 }
+input:focus, textarea:focus{
+    outline-color: var(--primary-color);}
 
 .dropzone {
     border: 2px dashed #ddd;
