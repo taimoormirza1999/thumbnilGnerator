@@ -363,6 +363,7 @@ input:checked + .slider:before {
     aspect-ratio: 13/9;
     object-fit: cover;
     border-radius: 10px;
+    height: 100%;
 }
 .thumbnail-image.image-error{
     height: 6.5rem;
