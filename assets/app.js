@@ -470,7 +470,7 @@ function createThumbnailActionButtons(thumbnail, index, container) {
     const downloadBtn = document.createElement('button');
     downloadBtn.type = 'button';
     downloadBtn.className = 'action-btn';
-    downloadBtn.innerHTML = `<img src="/icons/download.svg" alt="Download" style=" vertical-align:middle; margin-right:6px;">`;
+    downloadBtn.innerHTML = `<img src="/assets/icons/download.svg" alt="Download" style=" vertical-align:middle; margin-right:6px;">`;
     
     downloadBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -487,7 +487,7 @@ function createThumbnailActionButtons(thumbnail, index, container) {
     const regenerateBtn = document.createElement('button');
     regenerateBtn.className = 'action-btn';
     regenerateBtn.type = 'button';
-    regenerateBtn.innerHTML = `<img src="/icons/regenerate.svg" alt="Regenerate" style=" vertical-align:middle; margin-right:6px;">`;
+    regenerateBtn.innerHTML = `<img src="/assets/icons/regenerate.svg" alt="Regenerate" style=" vertical-align:middle; margin-right:6px;">`;
 
     
     regenerateBtn.addEventListener('click', (e) => {
@@ -1424,7 +1424,7 @@ async function pollThumbnailStatus(titleId, expectedQuantity, attempt = 0, batch
                         console.log(`Image failed to load for thumbnail ${thumbnail.id}: ${thumbnail.image_url}`);
                     
                             // Use a fallback image
-                        img.src = 'icons/image-error.svg';
+                        img.src = 'assets/icons/image-error.svg';
                         img.classList.add('image-error');
                         img.alt = 'Image failed to load';
                         // const errorText = document.createElement('div');
@@ -1720,35 +1720,21 @@ function renderThumbnail(thumbnail, index) {
         console.log(`Image failed to load for thumbnail ${thumbnail.id}: ${thumbnail.image_url}`);
         
         // Use a fallback image
-        img.src = 'icons/image-error.svg';
+        img.src = 'assets/icons/image-error.svg';
         img.classList.add('image-error');
         img.alt = 'Image failed to load';
         
-        const errorText = document.createElement('h4');
-        errorText.className = 'error-Text font-weight-bold text-4xl';
-        errorText.id = loader.id;
-        errorText.dataset.id = thumbnail.id;
-        errorText.textContent = 'Failed to load image';
+        // const errorText = document.createElement('h4');
+        // errorText.className = 'error-Text font-weight-bold text-4xl';
+        // errorText.id = loader.id;
+        // errorText.dataset.id = thumbnail.id;
+        // errorText.textContent = 'Failed to load image';
         // Create new onload handler for the error image
         img.onload = function() {
-            // thumbContainer.appendChild(img);
-            thumbContainer.appendChild(errorText);
+            thumbContainer.appendChild(img);
+            // thumbContainer.appendChild(errorText);
             // Add actions with just regenerate button for failed images
-            const actions = document.createElement('div');
-            actions.className = 'thumbnail-actions';
-        
-            const regenerateBtn = document.createElement('button');
-            regenerateBtn.className = 'action-btn';
-            regenerateBtn.type = 'button';
-            regenerateBtn.textContent = 'Regenerate';
-            regenerateBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                regenerateSingleThumbnail(index, thumbnail.id);
-            });
-            
-            actions.appendChild(regenerateBtn);
-            thumbContainer.appendChild(actions);
+            createThumbnailActionButtons(thumbnail, index, thumbContainer);
         };
     };
 }
