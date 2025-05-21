@@ -5,7 +5,8 @@ import {
   uploadReference, getReferences, getGlobalReferences, deleteReference,
   generateThumbnails, getThumbnails, regenerateThumbnail
 } from './frontend/apiService.js';
-
+// const SERVER_BASE_URL = 'http://localhost:3002'
+const SERVER_BASE_URL = 'https://thumbnilgnerator.onrender.com'
 // Simulated Server API
 const ServerAPI = {
     // Simulated server data storage (In a real app, this would be on the server)
@@ -401,7 +402,7 @@ async function handleRegister(event) {
     const password = document.getElementById('register-password').value;
     
     if (!username || !email || !password) {
-        alert("Please fill in all fields");
+        Toast('error', 'Error', 'Please fill in all fields');
         return;
     }
     
@@ -791,7 +792,7 @@ function setupDragAndDrop(dropzone, referencesArray, displayElement, isGlobal) {
         const files = dt.files;
         
         if (!isGlobal && !currentTitle) {
-            alert('Please enter a title first');
+            Toast('error', 'Error', 'Please enter a title first');
             return;
         }
         
@@ -1398,7 +1399,7 @@ async function pollThumbnailStatus(titleId, expectedQuantity, attempt = 0, batch
                     
                     // Add the image
                     const img = document.createElement('img');
-                    img.src = thumbnail.image_url;
+                    img.src = `${SERVER_BASE_URL}/${thumbnail.image_url}`;
                     img.alt = thumbnail.summary || 'Generated thumbnail';
                     img.className = 'thumbnail-image';
                     
@@ -1696,10 +1697,13 @@ function renderThumbnail(thumbnail, index) {
     
     // Add the image
     const img = document.createElement('img');
-    img.src = thumbnail.image_url;
+    img.src = `${SERVER_BASE_URL}/${thumbnail.image_url}`;
     img.alt = thumbnail.summary || 'Generated thumbnail';
     img.className = 'thumbnail-image';
-    
+    // alert(img.src);
+    // console.log("********************")
+    // console.log(thumbnail.image_url);
+    // console.log("********************")
     // Only proceed with adding content after image has loaded
     img.onload = function() {
         thumbContainer.appendChild(img);

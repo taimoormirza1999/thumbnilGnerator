@@ -377,11 +377,11 @@ input:checked + .slider:before {
 .thumbnail-actions {
     padding: 10px;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     width: 100%;
-    background-color: #fff;
     border-radius: 10px;
     margin-top: 0.3rem;
+    gap: 0.5rem;
 }
 
 .action-btn {
@@ -390,16 +390,18 @@ input:checked + .slider:before {
     color: var(--primary-color);
     cursor: pointer;
     font-size: 0.95rem;
-    color: white;
+    background: white;
     /* padding: 0.5rem 1rem; */
     border-radius: 2.25rem;
+    padding:0.45rem!important;
 }
 .bg-transparent{
     background: transparent!important;
 }
 .action-btn img{
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
+    margin: 0px !important;;
 }
 .copy-btn{
     border: none;
@@ -431,7 +433,7 @@ input:checked + .slider:before {
     /* justify-content: center !important; */
     display: flex !important; 
     color: #e74c3c !important;
-    background-color: #fff;
+    /* background-color: #fff; */
     
 
   }

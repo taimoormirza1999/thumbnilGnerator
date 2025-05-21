@@ -46,7 +46,7 @@ class ThumbnailDispatcher {
         );
         await this.pool.execute(
           'UPDATE thumbnails SET status = ?, image_url = ? WHERE idea_id = ?',
-          ['completed', imageUrl, idea.id]
+          ['completed', imageUrl.imageUrl, idea.id]
         );
       } catch (err) {
         await this.pool.execute(

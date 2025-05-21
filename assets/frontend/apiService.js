@@ -2,6 +2,7 @@ import axios from 'https://cdn.jsdelivr.net/npm/axios@1.3.5/+esm';
    // Add this at the top of apiService.js
    let preventReload = false;
 // Use the full server address with port where your backend is running
+// const API_URL = 'http://localhost:3002/api';
 const API_URL = 'https://thumbnilgnerator.onrender.com/api';
 
 // Create axios instance with auth token
