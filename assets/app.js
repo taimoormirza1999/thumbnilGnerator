@@ -2097,8 +2097,8 @@ function renderErrorThumbnail(errorMessage, index, thumbnailId) {
     thumbContainer.appendChild(actions);
 }
 regenerateBtnImg.addEventListener('click',function(){
-console.log("dsfs");
 loadThumbnails(currentTitle.id);
+Toast('success','Updated','Data updated successfully!');
 })
 // Call this function when the DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {

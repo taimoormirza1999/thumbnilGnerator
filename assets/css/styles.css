@@ -624,7 +624,9 @@ min-width: 50%;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     border-radius: 12px;
 }
-
+#regenerate-btn-img{
+    cursor: pointer;
+}
 .prompt-details {
     flex: 2;
     min-width: 300px;
