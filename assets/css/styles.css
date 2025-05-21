@@ -366,8 +366,8 @@ input:checked + .slider:before {
     height: 100%;
 }
 .thumbnail-image.image-error{
-    height: 6.5rem;
-    width: 6.5rem;
+    height: 6rem;
+    width: 6rem;
     object-fit: contain;
     margin: auto;
     /* margin-bottom: 1.2rem;
@@ -384,7 +384,7 @@ input:checked + .slider:before {
     margin-top: 0.3rem;
     gap: 0.5rem;
     position: absolute;
-    bottom: 0.2px;
+    bottom: 0.25rem;
     right: 0.2rem;
 }
 
@@ -397,7 +397,7 @@ input:checked + .slider:before {
     background: white;
     /* padding: 0.5rem 1rem; */
     border-radius: 2.25rem;
-    padding:0.4rem!important;
+    padding:0.35rem!important;
 }
 .bg-transparent{
     background: transparent!important;
