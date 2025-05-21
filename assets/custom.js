@@ -115,3 +115,18 @@ function Toast(type, title, message, positionToast) {
     });
   }
   
+  function getLogo(height=50, width=50){
+    return `
+    <img src="assets/logo.png" alt="AITG" style="width:${width}px; height:${height}px; vertical-align:middle; margin-right:6px;">
+    `
+  }
+
+  onload(()=>{
+    const logoContainer = document.getElementsByClassName('logo-container');
+    logoContainer.innerHTML = getLogo();
+  })
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const logoContainer = document.getElementsByClassName('logo-container');
+    logoContainer.innerHTML = getLogo();
+  })
