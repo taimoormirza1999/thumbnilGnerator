@@ -32,7 +32,7 @@ h1, h2, h3 {
 .sidebar {
     width: 260px;
     color: #ecf0f1;
-    padding: 0.75rem;
+    padding: 0.6rem;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
     flex-shrink: 0;
@@ -43,6 +43,7 @@ h1, h2, h3 {
     height: 100vh;
     overflow-y: auto;
     flex-grow: 1;
+    border-right: 0.15rem groove #c097c8 !important;
 }
 
 .sidebar-header {
@@ -73,10 +74,12 @@ h1, h2, h3 {
     color:#232323;
     text-transform: capitalize;
 font-size: 0.95rem;
+transition: all 0.34s ease;
 }
 
 .title-item:hover {
-    background-color: rgba(\255, 255, 255, 0.5);
+    /* background-color: rgba(\255, 255, 255, 0.5); */
+    transform: translateY(-3px);
 }
 
 .title-item.active {
