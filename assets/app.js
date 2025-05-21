@@ -3,7 +3,7 @@ import {
   login, register, getProfile, 
   createTitle, getTitles, getTitle, updateTitle, deleteTitle,
   uploadReference, getReferences, getGlobalReferences, deleteReference,
-  generateThumbnails, getThumbnails, regenerateThumbnail
+  generateThumbnails, getThumbnails, regenerateThumbnail, getThumbnailById
 } from './frontend/apiService.js';
 // const SERVER_BASE_URL = 'http://localhost:3002'
 const { API_URL, OTHER_FLAG } = window.__ENV__
@@ -232,6 +232,8 @@ const referenceThumbnails = document.getElementById('reference-thumbnails');
 const fullPrompt = document.getElementById('full-prompt');
 const loadingOverlay = document.getElementById('loading-overlay');
 const copyBtn = document.querySelector('.copy-btn');
+const regenerateBtnImg = document.getElementById("regenerate-btn-img");
+
 
 // Callback to handle when a thumbnail is ready
 let thumbnailReady = null;
@@ -348,6 +350,9 @@ async function loadUserData() {
         document.getElementById('login-container').style.display = 'none';
         document.getElementById('app-container').style.display = 'flex';
 
+    //    const thumbnails3 = await getThumbnailById(3);
+    //    console.log("************ THUMBNAILS 3 ************")
+        // console.log(thumbnails3.data.thumbnail)
         // If titles are loaded, start polling for the first one for demonstration
         if (titles && titles.length > 0) {
             const firstTitleId = titles[0].id;
@@ -365,6 +370,7 @@ async function loadUserData() {
         }
         // alert('Failed to load data. Please try again.');
         Toast('error', 'Error', 'Failed to load data. Please try again.');
+        window.location.reload();
     }
 }
 
@@ -389,9 +395,10 @@ async function handleLogin(event) {
          // Set username in the UI
          document.getElementById('username-display').textContent = "@"+currentUser.username;
         await loadUserData();
+        Toast('success', 'Success', 'Login successfuly!');
     } catch (error) {
         console.error('Login error:', error.message);
-        alert(error.response?.data?.error || 'Login failed. Please try again.');
+        Toast('error', 'Error', error.response?.data?.error || 'Login failed. Please try again.');
     }
 }
 
@@ -518,6 +525,7 @@ function logout() {
     globalReferences = [];
     currentTitle = null;
     showLoginForm();
+    Toast('success', 'Success', 'Logout successfuly!');
 }
 
 // Event Listeners
@@ -981,6 +989,14 @@ function renderTitlesList() {
     });
 }
 
+function regenerateThumbnails(){
+   alert("Regenerating thumbnails");
+    if(currentTitle){
+        currentTitle.thumbnails = [];
+        renderSavedThumbnails(currentTitle);
+    }
+}
+
 // Load a title when clicked from the sidebar
 async function loadTitle(titleItem) {
     // showLoading(true);
@@ -1164,8 +1180,8 @@ async function loadThumbnails(titleId) {
         const response = await getThumbnails(titleId);
         const thumbnails = response.data.thumbnails || [];
         currentReferenceDataMap = response.data.referenceDataMap || {}; // Store the map
-        console.log('Received thumbnails data:', thumbnails);
-        console.log('Received reference data map:', currentReferenceDataMap);
+        // console.log('Received thumbnails data:', thumbnails);
+        // console.log('Received reference data map:', currentReferenceDataMap);
         
         // Update current title thumbnails
         if (currentTitle && currentTitle.id === titleId) {
@@ -1430,11 +1446,6 @@ async function pollThumbnailStatus(titleId, expectedQuantity, attempt = 0, batch
                         img.src = 'assets/icons/image-error.svg';
                         img.classList.add('image-error');
                         img.alt = 'Image failed to load';
-                        // const errorText = document.createElement('div');
-                        // errorText.className = 'error-Text';
-                        // errorText.id = loader.id;
-                        // errorText.dataset.id = thumbnail.id;
-                        // errorText.appendChild(img);
                         
                         // Create new onload handler for the error image
                         img.onload = function() {
@@ -1816,11 +1827,10 @@ function pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt = 0) {
         return;
     }
     
-    // Get the specific thumbnail status
-    getThumbnails(titleId)
+    // Get the specific thumbnail status using getThumbnailById
+    getThumbnailById(thumbnailId)
         .then(response => {
-            const thumbnails = response.data.thumbnails || [];
-            const thumbnail = thumbnails.find(t => t.id === thumbnailId);
+            const thumbnail = response.data.thumbnail;
             
             if (!thumbnail) {
                 console.warn(`Thumbnail ${thumbnailId} not found in response`);
@@ -1835,17 +1845,83 @@ function pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt = 0) {
             if (thumbnail.status === 'completed') {
                 console.log('Im in completed pool thubnil status fucntion' );
                 const loader = document.getElementById(`thumb-${index}`);
-                loader.remove();
-                // Update the thumbnail in the current title
-                if (currentTitle && currentTitle.thumbnails) {
-                    const thumbnailIndex = currentTitle.thumbnails.findIndex(t => t.id === thumbnailId);
-                    if (thumbnailIndex !== -1) {
-                        currentTitle.thumbnails[thumbnailIndex] = thumbnail;
-                    }
-                }
                 
-                // Render the updated thumbnail
-                renderThumbnail(thumbnail, index);
+                // Create a new thumbnail element
+                const thumbElement = document.createElement('div');
+                thumbElement.className = 'thumbnail-item';
+                thumbElement.id = `thumb-${index}`;
+                thumbElement.dataset.id = thumbnail.id;
+                
+                // Add the image
+                const img = document.createElement('img');
+                img.src = `${SERVER_BASE_URL}/${thumbnail.image_url}`;
+                img.alt = thumbnail.summary || 'Generated thumbnail';
+                img.className = 'thumbnail-image';
+                
+                // Only proceed with replacement after image has loaded
+                img.onload = function() {
+                    thumbElement.appendChild(img);
+                    
+                    // Add actions
+                    createThumbnailActionButtons(thumbnail, index, thumbElement);
+                    
+                    // Clean up the loader timer if it exists
+                    if (loader && loader.dataset.timerId) {
+                        clearInterval(parseInt(loader.dataset.timerId));
+                    }
+                    
+                    // Remove loader and add the new thumbnail
+                    if (loader) {
+                        loader.remove();
+                    }
+                    
+                    // Insert the new thumbnail at the same position
+                    thumbnailsGrid.insertBefore(thumbElement, thumbnailsGrid.firstChild);
+                    
+                    // Update the thumbnail in the current title
+                    if (currentTitle && currentTitle.thumbnails) {
+                        const thumbnailIndex = currentTitle.thumbnails.findIndex(t => t.id === thumbnailId);
+                        if (thumbnailIndex !== -1) {
+                            currentTitle.thumbnails[thumbnailIndex] = thumbnail;
+                        }
+                    }
+                };
+                
+                // Handle image loading error
+                img.onerror = function() {
+                    console.log(`Image failed to load for thumbnail ${thumbnail.id}: ${thumbnail.image_url}`);
+                    img.src = 'assets/icons/image-error.svg';
+                    img.classList.add('image-error');
+                    img.alt = 'Image failed to load';
+                    
+                    // Create new onload handler for the error image
+                    img.onload = function() {
+                        thumbElement.appendChild(img);
+                        
+                        // Add actions with just regenerate button for failed images
+                        const actions = document.createElement('div');
+                        actions.className = 'thumbnail-actions';
+                        
+                        const regenerateBtn = document.createElement('button');
+                        regenerateBtn.className = 'action-btn';
+                        regenerateBtn.type = 'button';
+                        regenerateBtn.textContent = 'Regenerate';
+                        regenerateBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            regenerateSingleThumbnail(index, thumbnail.id);
+                        });
+                        
+                        actions.appendChild(regenerateBtn);
+                        thumbElement.appendChild(actions);
+                        
+                        // Remove loader and add the new thumbnail
+                        if (loader) {
+                            loader.remove();
+                        }
+                        thumbnailsGrid.insertBefore(thumbElement, thumbnailsGrid.firstChild);
+                    };
+                };
                 
                 // Reset reload prevention
                 preventPageReloads = false;
@@ -2020,7 +2096,10 @@ function renderErrorThumbnail(errorMessage, index, thumbnailId) {
     thumbContainer.appendChild(errorMsg);
     thumbContainer.appendChild(actions);
 }
-
+regenerateBtnImg.addEventListener('click',function(){
+console.log("dsfs");
+loadThumbnails(currentTitle.id);
+})
 // Call this function when the DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     init();
@@ -2034,6 +2113,8 @@ window.addEventListener('beforeunload', function(e) {
   // e.preventDefault(); 
   // e.returnValue = '';
 }); 
+
+
 
 // Add this to the VERY TOP of your script
 setInterval(() => {

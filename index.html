@@ -123,7 +123,9 @@
                 <div class="title-references" id="title-references" style="display: none;">
                     <div class="dropzone" id="title-dropzone">
                         <p>Drop title-specific reference images here or</p>
-                        <button class="btn" id="title-upload-btn">Upload</button>
+                        <button class="btn bg-transparent" id="title-upload-btn">
+                            <img src="/assets/icons/upload.svg" alt="Upload" style="width:24px; height:24px; vertical-align:middle;">
+                        </button>
                         <input type="file" id="title-file-input" multiple accept="image/*" style="display: none;">
                     </div>
                     <div class="reference-images" id="title-reference-images">
@@ -170,7 +172,10 @@
 
             <!-- Thumbnails Results -->
             <div class="thumbnails-section">
+               <div class="thumbnails-header flex justify-between items-center mb-2">
                 <h3 class="text-lg font-semibold mb-3">Generated Thumbnails</h3>
+                <img src="assets/icons/regenerate.svg" alt="Refresh" style="width:24px; height:24px; vertical-align:middle; margin-right:6px;" id="regenerate-btn-img" >
+               </div>
                 <div class="thumbnails-grid" id="thumbnails-grid">
                     <!-- Thumbnails will be displayed here -->
                     <div class="empty-state bg-gray-50 bg-opacity-20 text-white rounded" id="thumbnails-empty-state">No thumbnails generated yet.</div>

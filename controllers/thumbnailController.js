@@ -363,8 +363,99 @@ async function getThumbnails(req, res) {
     res.status(500).json({ error: `Failed to get thumbnails: ${error.message}` });
   }
 }
+
+// Get a single thumbnail by ID
+async function getThumbnailById(req, res) {
+  if (!req.user || !req.user.id) {
+    console.error('User not authenticated properly');
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  const { thumbnailId } = req.params;
+
+  if (!thumbnailId) {
+    return res.status(400).json({ error: 'Thumbnail ID is required' });
+  }
+
+  try {
+    const thumbnailQuery = `
+      SELECT t.id, t.title_id, t.idea_id, t.image_url, t.status, t.created_at, t.error_message,
+             t.used_reference_ids,
+             i.summary, i.full_prompt as fullPrompt,
+             titles.title as title_text, 
+             titles.instructions as title_instructions
+      FROM thumbnails t
+      JOIN ideas i ON t.idea_id = i.id
+      JOIN titles ON t.title_id = titles.id
+      WHERE t.id = ?
+    `;
+
+    const [thumbnailRows] = await pool.execute(thumbnailQuery, [thumbnailId]);
+
+    if (!thumbnailRows || thumbnailRows.length === 0) {
+      return res.status(404).json({ error: 'Thumbnail not found' });
+    }
+
+    const row = thumbnailRows[0];
+    let usedRefIdsList = [];
+    let referenceCount = 0;
+
+    if (row.used_reference_ids) {
+      try {
+        const refIds = JSON.parse(row.used_reference_ids);
+        if (refIds && Array.isArray(refIds) && refIds.length > 0) {
+          usedRefIdsList = refIds.filter(id => id != null);
+          referenceCount = usedRefIdsList.length;
+        }
+      } catch (e) {
+        console.error(`Error parsing used_reference_ids for thumbnail ${row.id}:`, e.message);
+      }
+    }
+
+    // Get reference images if any were used
+    let referenceDataMap = {};
+    if (usedRefIdsList.length > 0) {
+      const placeholders = usedRefIdsList.map(() => '?').join(',');
+      const [refDataRows] = await pool.execute(
+        `SELECT id, image_data FROM references2 WHERE id IN (${placeholders})`,
+        usedRefIdsList
+      );
+      refDataRows.forEach(refRow => {
+        referenceDataMap[refRow.id] = refRow.image_data;
+      });
+    }
+
+    const promptDetails = {
+      summary: row.summary || '',
+      title: row.title_text || 'Unknown Title',
+      instructions: row.title_instructions || 'No custom instructions provided',
+      referenceCount: referenceCount,
+      referenceImages: usedRefIdsList,
+      fullPrompt: row.fullPrompt || ''
+    };
+
+    const thumbnail = {
+      id: row.id,
+      idea_id: row.idea_id,
+      title_id: row.title_id,
+      image_url: row.image_url || '',
+      status: row.status || 'unknown',
+      created_at: row.created_at || new Date(),
+      error_message: row.error_message || '',
+      summary: row.summary || '',
+      promptDetails: promptDetails
+    };
+
+    res.status(200).json({ thumbnail, referenceDataMap });
+  } catch (error) {
+    console.error('Error getting thumbnail:', error);
+    res.status(500).json({ error: `Failed to get thumbnail: ${error.message}` });
+  }
+}
+
 module.exports = {
   generateThumbnails,
   getThumbnails,
-  regenerateThumbnail
+  regenerateThumbnail,
+  getThumbnailById
 }; 

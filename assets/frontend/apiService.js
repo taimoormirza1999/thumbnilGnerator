@@ -79,6 +79,11 @@ export const getThumbnails = async (titleId) => {
   return response;
 };
 
+export const getThumbnailById = async (thumbnailId) => {
+  const response = await api.get(`/thumbnails/single/${thumbnailId}`);
+  return response;
+};
+
 export default api; 
 
 // Near your getThumbnails function
