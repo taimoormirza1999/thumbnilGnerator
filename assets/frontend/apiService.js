@@ -12,7 +12,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json'
   },
-  timeout: 20000 // Default timeout for most requests
+  timeout: 100000 // Default timeout for most requests
 });
 
 // Add auth token to requests if available
@@ -24,7 +24,7 @@ api.interceptors.request.use(config => {
   
   // Set longer timeout for thumbnail generation specifically
   if (config.url === '/thumbnails/generate') {
-    config.timeout = 120000; // 2 minutes for thumbnail generation
+    config.timeout = 450000; // 2 minutes for thumbnail generation
   }
   
   return config;

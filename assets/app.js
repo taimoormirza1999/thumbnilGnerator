@@ -595,21 +595,21 @@ function setupEventListeners() {
             titles = titlesResponse.data.titles;
             renderTitlesList();
         } catch (error) {
-            console.error('Error generating thumbnails:', error);
-            
+            if (error.isProcessingTimeout) {
+                console.log('Generation timed out, but server is still working…')
+                pollThumbnailStatus(error.titleId, error.quantity, 0, batchId)
+                return;
+              }
             // More detailed error information
             if (error.response) {
                 console.error("Server responded with error:", error.response.status);
                 console.error("Error data:", error.response.data);
                 Toast('error', 'Error', `Server error (${error.response.status}): ${error.response.data?.error || 'Unknown error'}`);
-                // alert(`Server error (${error.response.status}): ${error.response.data?.error || 'Unknown error'}`);
             } else if (error.request) {
                 console.error("No response received:", error.request);
-                // alert('No response from server. Please check if the backend is running.');
             } else {
                 console.error("Request setup error:", error.message);
                 Toast('error', 'Error', `Error: ${error.message}`);
-                // alert(`Error: ${error.message}`);
             }
             
             
