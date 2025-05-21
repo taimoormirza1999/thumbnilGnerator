@@ -244,7 +244,7 @@ let preventPageReloads = false;
 
 // Initialize the application
 async function init() {
-    console.log("Initializing app...");
+    // console.log("Initializing app...");
     showLoading(true);
     
     // Initialize activeGenerationRequests from localStorage if it exists
@@ -266,7 +266,7 @@ async function init() {
         const token = localStorage.getItem('token');
         if (token) {
             showApp();
-            console.log("Token found, getting user profile...");
+            // console.log("Token found, getting user profile...");
             // Get user profile
             const response = await getProfile();
             currentUser = response.data.user;
@@ -296,7 +296,7 @@ async function init() {
 
 // Show/hide loading indicator
 function showLoading(show) {
-    console.log("Loading indicator:", show ? "SHOWING" : "HIDING");
+    // console.log("Loading indicator:", show ? "SHOWING" : "HIDING");
     isLoading = show;
     
     // Show/hide the loading overlay
@@ -318,20 +318,20 @@ function showLoading(show) {
 async function loadUserData() {
     try {
         // Fetch titles
-        console.log('LUD: Fetching titles...');
+        // console.log('LUD: Fetching titles...');
         const titlesResponse = await getTitles();
         titles = titlesResponse.data.titles;
-        console.log('LUD: Titles fetched:', titles ? titles.length : 0);
+        // console.log('LUD: Titles fetched:', titles ? titles.length : 0);
         
         // Fetch global references
-        console.log('LUD: Fetching global references...');
+        // console.log('LUD: Fetching global references...');
         const referencesResponse = await getGlobalReferences();
-        console.log('LUD: Global references API response:', referencesResponse);
+        // console.log('LUD: Global references API response:', referencesResponse);
         globalReferences = referencesResponse.data.references;
-        console.log('LUD: Stored global references:', globalReferences);
+        // console.log('LUD: Stored global references:', globalReferences);
         
         // Render UI
-        console.log('LUD: Rendering titles list...');
+        // console.log('LUD: Rendering titles list...');
         renderTitlesList();
         const lastId = localStorage.getItem('lastTitleId');
         if (lastId) {
@@ -340,9 +340,9 @@ async function loadUserData() {
                 elem.click();
             }
             }
-        console.log('LUD: Rendering global reference images...');
+        // console.log('LUD: Rendering global reference images...');
         renderReferenceImages(globalReferences, globalReferenceImages);
-        console.log('LUD: Global reference images rendered.');
+        // console.log('LUD: Global reference images rendered.');
         
         // Show main app container and hide login/register forms
         document.getElementById('login-container').style.display = 'none';
@@ -352,18 +352,19 @@ async function loadUserData() {
         if (titles && titles.length > 0) {
             const firstTitleId = titles[0].id;
             const defaultQuantity = 5;
-            console.log(`LUD: Automatically starting polling for title ID: ${firstTitleId}, quantity: ${defaultQuantity}`);
+            // console.log(`LUD: Automatically starting polling for title ID: ${firstTitleId}, quantity: ${defaultQuantity}`);
             // pollThumbnailStatus(firstTitleId, defaultQuantity);
         } else {
             console.log('LUD: No titles found, not starting auto-polling.');
         }
-        console.log('LUD: User data loading complete.');
+        // console.log('LUD: User data loading complete.');
     } catch (error) {
         console.error('Error loading user data (LUD):', error);
         if (error.response) {
             console.error('LUD: Server error response:', error.response.status, error.response.data);
         }
-        alert('Failed to load data. Please try again.');
+        // alert('Failed to load data. Please try again.');
+        Toast('error', 'Error', 'Failed to load data. Please try again.');
     }
 }
 
@@ -521,7 +522,7 @@ function logout() {
 
 // Event Listeners
 function setupEventListeners() {
-    console.log("Setting up event listeners...");
+    // console.log("Setting up event listeners...");
     
     // New Title Button
     newTitleBtn.addEventListener('click', () => {
@@ -534,7 +535,8 @@ function setupEventListeners() {
     generateBtn.addEventListener('click', async () => {
         const title = titleInput.value.trim();
         if (!title) {
-            alert('Please enter a title');
+            // alert('Please enter a title');
+            Toast('error', 'Error', 'Please enter a title');
             return;
         }
         
@@ -586,7 +588,7 @@ function setupEventListeners() {
             
             // Start polling for thumbnail status instead of loading immediately
             pollThumbnailStatus(currentTitle.id, quantity, 0, batchId);
-
+            
             // Refresh titles list after starting generation/polling
             console.log("Refreshing titles list");
             const titlesResponse = await getTitles();
@@ -599,13 +601,15 @@ function setupEventListeners() {
             if (error.response) {
                 console.error("Server responded with error:", error.response.status);
                 console.error("Error data:", error.response.data);
-                alert(`Server error (${error.response.status}): ${error.response.data?.error || 'Unknown error'}`);
+                Toast('error', 'Error', `Server error (${error.response.status}): ${error.response.data?.error || 'Unknown error'}`);
+                // alert(`Server error (${error.response.status}): ${error.response.data?.error || 'Unknown error'}`);
             } else if (error.request) {
                 console.error("No response received:", error.request);
                 // alert('No response from server. Please check if the backend is running.');
             } else {
                 console.error("Request setup error:", error.message);
-                alert(`Error: ${error.message}`);
+                Toast('error', 'Error', `Error: ${error.message}`);
+                // alert(`Error: ${error.message}`);
             }
             
             
@@ -710,7 +714,7 @@ function setupEventListeners() {
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', handleLogin);
-        console.log("Login form listener attached");
+        // console.log("Login form listener attached");
     } else {
         console.error("Login form not found!");
     }
@@ -741,7 +745,7 @@ function setupEventListeners() {
     const registerForm = document.getElementById('register-form');
     if (registerForm) {
         registerForm.addEventListener('submit', handleRegister);
-        console.log("Register form listener attached");
+        // console.log("Register form listener attached");
     } else {
         console.error("Register form not found!");
     }
@@ -983,13 +987,13 @@ async function loadTitle(titleItem) {
     
     try {
         const titleId = titleItem.id;
-        console.log(`Starting to load title with ID: ${titleId}`);
+        // console.log(`Starting to load title with ID: ${titleId}`);
         
         // Get the title details
         try {
             const titleResponse = await getTitle(titleId);
             currentTitle = titleResponse.data;
-            console.log(`Successfully loaded title details:`, currentTitle);
+            // console.log(`Successfully loaded title details:`, currentTitle);
         } catch (titleError) {
             console.error(`Error loading title details for ID ${titleId}:`, titleError);
             if (titleError.response) {
@@ -1002,7 +1006,7 @@ async function loadTitle(titleItem) {
         try {
             const referencesResponse = await getReferences(titleId);
             currentTitle.references = referencesResponse.data.references;
-            console.log(`Successfully loaded references:`, currentTitle.references);
+            // console.log(`Successfully loaded references:`, currentTitle.references);
         } catch (refError) {
             console.error(`Error loading references for title ID ${titleId}:`, refError);
             if (refError.response) {
@@ -1335,23 +1339,24 @@ function removeGenerationRequest(titleId) {
 
 // Poll for thumbnail generation status
 async function pollThumbnailStatus(titleId, expectedQuantity, attempt = 0, batchId) {
+
     // If polling is already in progress for this title, don't start another one
-    if (activePollingProcesses[titleId] && attempt === 0) {
-        console.log(`[Poll] Already polling for title ${titleId}, skipping new polling request`);
-        return;
-    }
+    // if (activePollingProcesses[titleId] && attempt === 0) {
+    //     console.log(`[Poll] Already polling for title ${titleId}, skipping new polling request`);
+    //     return;
+    // }
     
     // Mark this title as being polled if this is the first attempt
-    if (attempt === 0) {
-        activePollingProcesses[titleId] = true;
-        // Store generation request info
-        storeGenerationRequest(titleId, expectedQuantity);
+    // if (attempt === 0) {
+    //     activePollingProcesses[titleId] = true;
+    //     // Store generation request info
+    //     storeGenerationRequest(titleId, expectedQuantity);
         
-        // Add these two lines to prevent page reloads
-        preventPageReloads = true;
-        window.preventReload = true;
-        console.log("Page reload prevention activated");
-    }
+    //     // Add these two lines to prevent page reloads
+    //     preventPageReloads = true;
+    //     window.preventReload = true;
+    //     console.log("Page reload prevention activated");
+    // }
     
     console.log(`[Poll #${attempt + 1}] Polling for thumbnails for title ${titleId}`);
     const maxAttempts = 60; // Poll for up to 3 minutes (60 * 3s)
@@ -1364,7 +1369,8 @@ async function pollThumbnailStatus(titleId, expectedQuantity, attempt = 0, batch
     //     finishPolling(titleId, "Polling timed out - the server might still be processing your request. Check back later.", batchId);
     //     return;
     // }
-
+    console.log('***********pollThumbnailStatus***********');
+    console.log(`[Poll #${attempt + 1}] Polling for thumbnails for title ${titleId}`);
     try {
         // Get the thumbnails from the server
         const response = await getThumbnails(titleId);
@@ -1459,7 +1465,7 @@ async function pollThumbnailStatus(titleId, expectedQuantity, attempt = 0, batch
                         };
                     };
                 }
-            } else if (thumbnail.status === 'failed' && index < loaderCards.length && thumbnail.status != 'processing' && thumbnail.status != 'completed' ) {
+            } else if (thumbnail.status === 'failed' && (index < loaderCards.length && thumbnail.status != 'processing' && thumbnail.status != 'completed' )) {
                 console.log('Im in failed pool thubnil status fucntion' );
                     const loader = loaderCards[index];
                     
@@ -1474,7 +1480,7 @@ async function pollThumbnailStatus(titleId, expectedQuantity, attempt = 0, batch
                     // Use the dedicated error renderer
                     renderErrorThumbnail(thumbnail.error_message, index, thumbnail.id);
                 //  loader.replaceWith(renderErrorThumbnail(thumbnail.error_message, index, thumbnail.id));
-            } else if (thumbnail.status === 'processing' && thumbnail.status != 'failed' && thumbnail.status != 'completed' ) {
+            } else if (thumbnail.status === 'processing' && (thumbnail.status != 'failed' && thumbnail.status != 'completed') ) {
                 processingCount++;
             } else {
                 pendingCount++;
@@ -1487,28 +1493,28 @@ async function pollThumbnailStatus(titleId, expectedQuantity, attempt = 0, batch
         console.log(`[Poll] Status: ${completedCount} completed, ${failedCount} failed, ${processingCount} processing, ${pendingCount} pending out of ${totalRelevant}`);
 
         // Update progress UI
-        ai1Status.textContent = 'Thumbnail ideas generated';
-        ai1Progress.style.width = '100%';
+        // ai1Status.textContent = 'Thumbnail ideas generated';
+        // ai1Progress.style.width = '100%';
         
         // Update progress percentage based on completed/failed thumbnails
-        const progressPercentage = totalRelevant > 0 ? (finishedCount / totalRelevant) * 100 : 0;
-        ai2Status.textContent = `Creating images... ${finishedCount}/${totalRelevant} complete`;
-        ai2Progress.style.width = `${progressPercentage}%`;
+        // const progressPercentage = totalRelevant > 0 ? (finishedCount / totalRelevant) * 100 : 0;
+        // ai2Status.textContent = `Creating images... ${finishedCount}/${totalRelevant} complete`;
+        // ai2Progress.style.width = `${progressPercentage}%`;
 
         // Check if polling is complete - either all thumbnails are done or we have at least the expected quantity
-        if ((finishedCount === totalRelevant && totalRelevant > 0) || 
-            (finishedCount >= expectedQuantity && finishedCount > 0)) {
-            console.log('finished polling start');
-            finishPolling(titleId, null, batchId);
-            console.log('finished polling end');
-            // If all thumbnails are ready, update the current title's thumbnails
-            if (currentTitle && currentTitle.id === parseInt(titleId)) {
-                currentTitle.thumbnails = relevantThumbnails;
-                moreThumbnailsSection.style.display = 'block';
-            }
+        // if ((finishedCount === totalRelevant && totalRelevant > 0) || 
+        //     (finishedCount >= expectedQuantity && finishedCount > 0)) {
+        //     console.log('finished polling start');
+        //     finishPolling(titleId, null, batchId);
+        //     console.log('finished polling end');
+        //     // If all thumbnails are ready, update the current title's thumbnails
+        //     if (currentTitle && currentTitle.id === parseInt(titleId)) {
+        //         currentTitle.thumbnails = relevantThumbnails;
+        //         moreThumbnailsSection.style.display = 'block';
+        //     }
             
-            return;
-        }
+        //     return;
+        // }
 
         // Not all thumbnails are completed, schedule next poll
         console.log(`[Poll] Not all thumbnails are ready yet. Scheduling next poll in ${pollInterval}ms`);
@@ -1528,9 +1534,15 @@ async function pollThumbnailStatus(titleId, expectedQuantity, attempt = 0, batch
 }
 
 // Helper function to finish polling and clean up
-function finishPolling(titleId, errorMessage, batchId) {
-    console.log(`[Poll] Finishing polling for title ${titleId}`);
-    
+function finishPolling(titleId, errorMessage, batchId, attempt=0) {
+    const maxAttempts = 30; 
+    console.log(`[Poll] Finishing polling for title ${titleId} ` + `attempt: ${attempt}`);
+    if (attempt >= maxAttempts) {
+        console.warn(`[Poll] Reached maximum number of attempts (${maxAttempts})`);
+        preventPageReloads = false;
+        window.preventReload = false;
+        return;
+    }
     // Hide the progress section
     progressSection.style.display = 'none';
     
@@ -1541,13 +1553,23 @@ function finishPolling(titleId, errorMessage, batchId) {
     delete activePollingProcesses[titleId];
     
     // Clear any remaining loading animations/intervals
-    const loaders = document.querySelectorAll('.thumbnail-item.loading');
-    loaders.forEach(loader => {
-        if (loader.dataset.timerId) {
-            clearInterval(parseInt(loader.dataset.timerId));
-        }
-    });
+    // const loaders = document.querySelectorAll('.thumbnail-item.loading');
+    // loaders.forEach(loader => {
+    //     if (loader.dataset.timerId) {
+    //         clearInterval(parseInt(loader.dataset.timerId));
+    //     }
+    // });
 
+     // clear timers
+  document
+  .querySelectorAll('.thumbnail-item.loading')
+  .forEach(loader => clearInterval(loader.dataset.timerId));
+
+  if (currentTitle && +currentTitle.id === +titleId) {
+    renderSavedThumbnails(currentTitle);
+    moreThumbnailsSection.style.display = 'block';
+  }
+  
     // Reset reload prevention flags after a short delay
     setTimeout(() => {
         preventPageReloads = false;
@@ -1689,6 +1711,7 @@ function generateFullPrompt(title, instructions, index) {
 }
 // Render a thumbnail in the grid
 function renderThumbnail(thumbnail, index) {
+    console.log('***********renderThumbnail***********');
     const thumbContainer = document.getElementById(`thumb-${index}`);
     if (!thumbContainer) return;
     
@@ -1746,6 +1769,7 @@ function renderThumbnail(thumbnail, index) {
 }
 
 function regenerateSingleThumbnail(index, thumbnailId) {
+    console.log('***********regenerateSingleThumbnail***********');
     if (!currentTitle) return;
     
     try {
@@ -1768,7 +1792,7 @@ function regenerateSingleThumbnail(index, thumbnailId) {
                 console.log('Regeneration started:', response.data);
                 
                 // Start polling for the updated thumbnail
-                pollSingleThumbnailStatus(currentTitle.id, thumbnailId, index);
+                pollSingleThumbnailStatus(currentTitle.id, thumbnailId, index, 0, 'starting');
             })
             .catch(error => {
                 console.error('Error starting thumbnail regeneration:', error);
@@ -1784,14 +1808,14 @@ function regenerateSingleThumbnail(index, thumbnailId) {
 }
 
 // New function to poll for a single thumbnail status
-function pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt = 0) {
-    const maxAttempts = 30; // Poll for up to 90 seconds
+function pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt = 0, status='starting') {
+    const maxAttempts = 41; // Poll for up to 90 seconds
     const pollInterval = 3000; // Poll every 3 seconds
-    
+    console.log('***********pollSingleThumbnailStatus***********');
     console.log(`[Poll #${attempt + 1}] Polling for single thumbnail ${thumbnailId}`);
     
     if (attempt >= maxAttempts) {
-        console.warn(`Reached maximum polling attempts for thumbnail ${thumbnailId}`);
+        console.warn(`Reached maximum polling attempts for thumbnail ${thumbnailId} and thumbnail status: ${status}`);
         renderErrorThumbnail('Regeneration timed out', index, thumbnailId);
         preventPageReloads = false;
         window.preventReload = false;
@@ -1807,7 +1831,7 @@ function pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt = 0) {
             if (!thumbnail) {
                 console.warn(`Thumbnail ${thumbnailId} not found in response`);
                 setTimeout(() => {
-                    pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt + 1);
+                    pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt + 1, thumbnails.status);
                 }, pollInterval);
                 return;
             }
@@ -1834,7 +1858,7 @@ function pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt = 0) {
             } else {
                 // Still processing, poll again
                 setTimeout(() => {
-                    pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt + 1);
+                    pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt + 1, thumbnail.status);
                 }, pollInterval);
             }
         })
@@ -1842,7 +1866,7 @@ function pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt = 0) {
             console.error('Error polling thumbnail status:', error);
             // Try again with backoff
             setTimeout(() => {
-                pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt + 1);
+                pollSingleThumbnailStatus(titleId, thumbnailId, index, attempt + 1, 'failed');
             }, pollInterval * Math.min(2, attempt/5 + 1));
         });
 }
