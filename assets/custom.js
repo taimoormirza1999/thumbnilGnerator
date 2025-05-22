@@ -153,6 +153,7 @@ function Toast(type, title, message, positionToast) {
           // Close sidebar when clicking overlay
           overlay.addEventListener('click', function() {
             toggleSidebar();
+            document.body.style.overflow = 'hidden!important';
           });
         }
       }
