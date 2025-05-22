@@ -79,6 +79,53 @@ export const getThumbnails = async (titleId) => {
   return response;
 };
 
+// Cache for thumbnails to reduce database load
+const thumbnailCache = {
+  data: {},
+  timestamp: {},
+  maxAge: 5000, // 5 seconds max cache age
+
+  // Get from cache if available and not expired
+  get(ids) {
+    const key = Array.isArray(ids) ? ids.join(',') : ids;
+    const now = Date.now();
+    
+    // Check if cache exists and is fresh
+    if (this.data[key] && (now - this.timestamp[key] < this.maxAge)) {
+      console.log(`Using cached data for thumbnails: ${key}`);
+      return this.data[key];
+    }
+    
+    return null;
+  },
+  
+  // Store in cache
+  set(ids, data) {
+    const key = Array.isArray(ids) ? ids.join(',') : ids;
+    this.data[key] = data;
+    this.timestamp[key] = Date.now();
+  }
+};
+
+export const getThumbnailsByIds = (ids) => {
+  // Handle both array and non-array cases
+  const idsArray = Array.isArray(ids) ? ids : [ids];
+  
+  // Check cache first
+  const cachedData = thumbnailCache.get(idsArray);
+  if (cachedData) {
+    return Promise.resolve(cachedData);
+  }
+  
+  // If not in cache, make the request
+  return api.get(`/thumbnails/batch/${idsArray.join(',')}`)
+    .then(response => {
+      // Store in cache before returning
+      thumbnailCache.set(idsArray, response);
+      return response;
+    });
+};
+
 export const getThumbnailById = async (thumbnailId) => {
   const response = await api.get(`/thumbnails/single/${thumbnailId}`);
   return response;

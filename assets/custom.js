@@ -1,4 +1,3 @@
-
 // Toasts iziToast Helper
 function Toast(type, title, message, positionToast) {
   iziToast.destroy();
@@ -114,4 +113,81 @@ function Toast(type, title, message, positionToast) {
       });
     });
   }
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.innerWidth <= 768) {
+      toggleSidebar();
+    }
+  });
+  // Toggle Sidebar
+  function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    
+    // Add transition classes if not already present
+    if (!sidebar.classList.contains('sidebar-transition')) {
+      sidebar.classList.add('sidebar-transition');
+    }
+    
+    if (!mainContent.classList.contains('content-transition')) {
+      mainContent.classList.add('content-transition');
+    }
+    
+    // Toggle active state
+    sidebar.classList.toggle('active');
+    mainContent.classList.toggle('active');
+    
+    // For mobile devices only
+    if (window.innerWidth <= 768) {
+      // Add overlay for touch dismissal on mobile
+      if (!sidebar.classList.contains('active')) {
+        if (document.querySelector('.sidebar-overlay')) {
+          document.querySelector('.sidebar-overlay').remove();
+        }
+      } else {
+        // Create overlay if it doesn't exist
+        if (!document.querySelector('.sidebar-overlay')) {
+          const overlay = document.createElement('div');
+          overlay.className = 'sidebar-overlay';
+          
+          // Close sidebar when clicking overlay
+          overlay.addEventListener('click', function() {
+            toggleSidebar();
+          });
+        }
+      }
+    }
+  }
+  
+  // Add CSS transitions to document if not already present
+  (function() {
+    if (!document.getElementById('sidebar-transitions-css')) {
+      const style = document.createElement('style');
+      style.id = 'sidebar-transitions-css';
+      style.textContent = `
+        .sidebar-transition {
+          transition: transform 0.3s ease, left 0.3s ease, width 0.3s ease;
+        }
+        .content-transition {
+          transition: margin-left 0.3s ease, width 0.3s ease;
+        }
+       
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @media (max-width: 768px) {
+          .sidebar:not(.active) {
+            transform: translateX(-100%);
+          }
+          .sidebar.active {
+            transform: translateX(0);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  })();
+  
   

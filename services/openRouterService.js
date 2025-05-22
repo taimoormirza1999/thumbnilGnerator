@@ -64,8 +64,16 @@ async function generateIdeas(titleId, titleText, instructions, previousIdeas = [
       }
     });
 
-    const toolCall = response.data.choices[0].message.tool_calls[0];
-    const ideaData = JSON.parse(toolCall.function.arguments);
+      // 1) make sure we got at least one choice
+      const choices = response.data?.choices;
+      if (!Array.isArray(choices) || choices.length === 0) {
+        console.error('OpenRouter returned no choices:', response.data);
+        throw new Error('AI returned no choices');
+      }
+    // const toolCall = response.data.choices[0].message.tool_calls[0];
+    const message = choices[0].message;
+    const calls = message?.tool_calls;
+    const ideaData = JSON.parse(calls[0].function.arguments);
 
     if (!ideaData.summary || !ideaData.fullPrompt) {
       throw new Error('Incomplete idea data received from AI');

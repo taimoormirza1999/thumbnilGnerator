@@ -48,12 +48,7 @@ async function generateThumbnails(req, res) {
     );
     
     const references = refRows.map(row => ({ id: row.id, image_data: row.image_data }));
-    const dispatcher = new ThumbnailDispatcher({
-      maxParallel: MAX_PARALLEL,
-      pool,
-      openAIService,
-      references
-    });
+
     // Get previous ideas for this title to avoid duplication
     const prevParams = [titleId];
     if (prevParams.some(p => p === undefined)) {
@@ -66,69 +61,102 @@ async function generateThumbnails(req, res) {
       prevParams
     );
     
-    // Generate ideas - first step (sequential)
-    const newIdeas = [];
-    for (let i = 0; i < quantity; i++) {
-      const idea = await openRouterService.generateIdeas(
-        titleId, 
-        title.title, 
-        title.instructions,
-        [...prevIdeas, ...newIdeas] // Include previously generated ideas to avoid repetition
+    // Create dispatcher for background processing
+    const dispatcher = new ThumbnailDispatcher({ 
+      maxParallel: MAX_PARALLEL, 
+      pool, 
+      openAIService, 
+      references 
+    });
+
+    // First generate the ideas synchronously to get their IDs
+    console.log(`Generating ${quantity} initial ideas`);
+    const ideaPromises = Array.from({ length: quantity }).map(() =>
+      openRouterService.generateIdeas(titleId, title.title, title.instructions, [...prevIdeas])
+        .catch(err => {
+          console.warn("generateIdeas failed:", err.message);
+          return null;
+        })
+    );
+    
+    const ideaResults = await Promise.all(ideaPromises);
+    const validIdeas = ideaResults.filter(i => i !== null);
+    
+    // Now create thumbnails with the idea IDs
+    const thumbnailIds = [];
+    for (let i = 0; i < validIdeas.length; i++) {
+      const [result] = await pool.execute(
+        `INSERT INTO thumbnails (title_id, idea_id, status)
+        VALUES (?, ?, 'pending')`,
+        [titleId, validIdeas[i].id]
       );
-      newIdeas.push(idea);
-      dispatcher.enqueue(idea);
-      // Create thumbnail entry in processing state
-      // const thumbnailParams = [titleId, idea.id, 'pending'];
-      // if (thumbnailParams.some(p => p === undefined)) {
-      //   console.error('Attempted to execute query with undefined parameter:', { thumbnailParams });
-      //   return res.status(500).json({ error: 'Internal server error: Invalid query parameter detected' });
-      // }
-      
-      // await pool.execute(
-      //   'INSERT INTO thumbnails (title_id, idea_id, status) VALUES (?, ?, ?)',
-      //   thumbnailParams
-      // );
+      thumbnailIds.push(result.insertId);
     }
     
-    // Start image generation in parallel (respecting MAX_PARALLEL limit)
-    const processIdeas = async () => {
-      const pendingIdeas = [...newIdeas];
-      const activePromises = [];
-      
-      const startNextIdea = () => {
-        if (pendingIdeas.length === 0) return;
+    // Start generating images in the background
+    process.nextTick(async () => {
+      try {
+        // Enqueue all ideas for image generation
+        for (const idea of validIdeas) {
+          dispatcher.enqueue(idea);
+        }
         
-        const idea = pendingIdeas.shift();
-        const promise = openAIService.generateImage(idea.id, idea.fullPrompt, references)
-          .catch(error => console.error(`Error generating image for idea ${idea.id}:`, error))
-          .finally(() => {
-            // When one finishes, start another if available
-            const index = activePromises.indexOf(promise);
-            if (index !== -1) activePromises.splice(index, 1);
-            startNextIdea();
-          });
-        
-        activePromises.push(promise);
-      };
-      
-      // Start initial batch
-      const initialBatch = Math.min(MAX_PARALLEL, pendingIdeas.length);
-      for (let i = 0; i < initialBatch; i++) {
-        startNextIdea();
+        // If we didn't get enough ideas, try to generate more
+        if (validIdeas.length < quantity) {
+          console.log(`Only generated ${validIdeas.length} valid ideas out of ${quantity} requested. Trying to generate ${quantity - validIdeas.length} more.`);
+          
+          // Try up to 2 more times to get the remaining ideas
+          let remainingToGenerate = quantity - validIdeas.length;
+          let additionalIdeas = [];
+          
+          for (let attempt = 0; attempt < 2 && remainingToGenerate > 0; attempt++) {
+            const additionalPromises = Array.from({ length: remainingToGenerate * 2 }).map(() =>
+              openRouterService.generateIdeas(titleId, title.title, title.instructions, [...prevIdeas, ...validIdeas, ...additionalIdeas])
+                .catch(err => {
+                  console.warn(`Additional idea generation failed (attempt ${attempt + 1}):`, err.message);
+                  return null;
+                })
+            );
+            
+            const additionalResults = await Promise.all(additionalPromises);
+            const newValidIdeas = additionalResults.filter(i => i !== null).slice(0, remainingToGenerate);
+            
+            if (newValidIdeas.length === 0) {
+              console.warn(`No additional valid ideas generated in attempt ${attempt + 1}`);
+              break;
+            }
+            
+            // Create thumbnails for the additional ideas
+            for (const idea of newValidIdeas) {
+              const [result] = await pool.execute(
+                `INSERT INTO thumbnails (title_id, idea_id, status)
+                VALUES (?, ?, 'pending')`,
+                [titleId, idea.id]
+              );
+              thumbnailIds.push(result.insertId);
+              
+              // Start processing the thumbnail
+              dispatcher.enqueue(idea);
+            }
+            
+            additionalIdeas.push(...newValidIdeas);
+            remainingToGenerate = quantity - (validIdeas.length + additionalIdeas.length);
+          }
+        }
+      } catch (error) {
+        console.error('Error in background thumbnail generation:', error);
       }
-    };
-    
-    // Start processing in background
-    processIdeas();
-    
-    // Return immediately with the generated ideas
+    });
+
+    // Return immediately with the thumbnail IDs
     res.status(200).json({
-      message: `Started generating ${quantity} thumbnails`,
-      ideas: newIdeas
+      message: `Started generating ${thumbnailIds.length} thumbnails`,
+      thumbnailIds
     });
   } catch (error) {
     console.error('Error in generateThumbnails:', error);
-    res.status(500).json({ error: 'Failed to generate thumbnails' });
+    res.status(500).json({ error: 'Failed to generate thumbnails', error: error.message });
+    
   }
 }
 
@@ -453,9 +481,103 @@ async function getThumbnailById(req, res) {
   }
 }
 
+// GET /thumbnails/batch/:ids
+async function getThumbnailsByIds(req, res) {
+  if (!req.user?.id) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  // Parse comma-separated list from route params
+  const ids = (req.params.ids || '')
+    .split(',')
+    .map(id => parseInt(id, 10))
+    .filter(id => !isNaN(id));
+
+  // console.log(`Processing request for thumbnail IDs: ${ids.join(', ')}`);
+
+  if (!ids.length) {
+    return res.status(400).json({ error: 'No valid thumbnail IDs provided' });
+  }
+
+  try {
+    // fetch all the rows we need
+    const placeholders = ids.map(() => '?').join(',');
+    const query = `
+      SELECT
+        t.id, t.title_id, t.idea_id, t.image_url, t.status,
+        t.error_message, t.used_reference_ids, t.created_at,
+        i.summary, i.full_prompt AS fullPrompt,
+        titles.title       AS title_text,
+        titles.instructions AS title_instructions
+      FROM thumbnails t
+      JOIN ideas    i ON t.idea_id  = i.id
+      JOIN titles   ON t.title_id = titles.id
+      WHERE t.id IN (${placeholders})
+    `;
+    const [rows] = await pool.execute(query, ids);
+    
+    console.log(`Found ${rows.length} thumbnails for IDs: ${ids.join(', ')}`);
+
+    // build a map of used reference images for all thumbnails in one go
+    const allRefIds = rows
+      .flatMap(r => {
+        try { return JSON.parse(r.used_reference_ids) || []; }
+        catch { return []; }
+      })
+      .filter((v, i, a) => v != null && a.indexOf(v) === i);
+
+    let referenceDataMap = {};
+    if (allRefIds.length) {
+      const refPlaceholders = allRefIds.map(() => '?').join(',');
+      const [refRows] = await pool.execute(
+        `SELECT id, image_data FROM references2 WHERE id IN (${refPlaceholders})`,
+        allRefIds
+      );
+      referenceDataMap = Object.fromEntries(refRows.map(r => [r.id, r.image_data]));
+    }
+
+    // now map each row into a full object
+    const thumbnails = rows.map(row => {
+      let usedRefs = [];
+      try {
+        usedRefs = JSON.parse(row.used_reference_ids) || [];
+      } catch {}
+      const promptDetails = {
+        summary:       row.summary || '',
+        title:         row.title_text || 'Unknown Title',
+        instructions:  row.title_instructions || 'No custom instructions provided',
+        referenceCount: usedRefs.length,
+        referenceImages: usedRefs.map(id => referenceDataMap[id]).filter(Boolean),
+        fullPrompt:    row.fullPrompt || ''
+      };
+
+      return {
+        id:           row.id,
+        idea_id:      row.idea_id,
+        title_id:     row.title_id,
+        image_url:    row.image_url || '',
+        status:       row.status || 'unknown',
+        created_at:   row.created_at || new Date(),
+        error_message: row.error_message || '',
+        summary:      row.summary || '',
+        promptDetails
+      };
+    });
+
+    return res.json({ thumbnails, referenceDataMap });
+
+  } catch (err) {
+    console.error('Error in getThumbnailsByIds:', err);
+    res.status(500).json({ error: `Failed to fetch thumbnails: ${err.message}` });
+  }
+}
+
+
+
 module.exports = {
   generateThumbnails,
   getThumbnails,
   regenerateThumbnail,
-  getThumbnailById
+  getThumbnailById,
+  getThumbnailsByIds
 }; 

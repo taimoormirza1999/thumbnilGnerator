@@ -1,5 +1,5 @@
 const express = require('express');
-const { generateThumbnails, getThumbnails, regenerateThumbnail, getThumbnailById } = require('../controllers/thumbnailController');
+const { generateThumbnails, getThumbnails, regenerateThumbnail, getThumbnailById, getThumbnailsByIds } = require('../controllers/thumbnailController');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
@@ -11,6 +11,8 @@ router.post('/generate', generateThumbnails);
 router.post('/regenerate', regenerateThumbnail);
 router.get('/:titleId', getThumbnails);
 router.get('/single/:thumbnailId', getThumbnailById);
+// router.get('/batch', getThumbnailsByIds);
+router.get('/batch/:ids', getThumbnailsByIds);
 // router.post('/regenerate', (req, res) => {
 //   console.log('Regenerating thumbnail:', req.body);
 // //   alert('Regenerating thumbnail:'+req.body.titleId+' - '+req.body.thumbnailId);

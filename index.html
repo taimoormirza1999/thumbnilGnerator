@@ -77,29 +77,36 @@
         </div>
         
         <!-- Left Sidebar for Titles -->
-        <div class="sidebar ">
+        <div class="sidebar active">
             <div class="sidebar-header">
                 <h2 class="text-white font-bold text-xl">
-                   <img src="assets/logo.png" alt="AITG" class=" h-14 w-14 xl:h-14 xl:w-14 mb-3" style=" vertical-align:middle;align-self: center;">
+                   <img src="assets/logo.png" alt="AITG" class="h-14 w-14 xl:h-14 xl:w-14 mb-3" style=" vertical-align:middle;align-self: center;">
                 </h2>
-                <button id="new-title-btn" class="btn bg-transparent p-0"><img src="assets/icons/chat.svg" alt="Add" style="width:24px; height:24px; vertical-align:middle; margin-right:6px;"></button>
+                <button id="menu-btn" onclick="toggleSidebar()" class="btn bg-transparent p-0 block md:hidden h-8 w-8"><img src="assets/icons/menu.svg" alt="Menu" style="vertical-align:middle; margin-right:10px;"></button>
+                <button id="new-title-btn" class="btn bg-transparent p-0 hidden md:block"><img src="assets/icons/chat.svg" alt="Add" style="width:24px; height:24px; vertical-align:middle; margin-right:6px;"></button>
             </div>
             <div class="user-info">
                 <span id="username-display" class="text-white font-bold text-sm"></span>
-                <button id="logout-btn" class="btn bg-white rounded-full p-1.5 hover:bg-gray-200"><img src="assets/icons/logout.svg" alt="Logout" style="width:24px; height:24px; vertical-align:middle;"></button>
+                <button id="logout-btn" class="btn bg-white rounded-full p-1.5 hover:bg-gray-200 hidden md:block"><img src="assets/icons/logout.svg" alt="Logout" style="width:24px; height:24px; vertical-align:middle;"></button>
+                <button id="new-title-btn1" class="btn bg-transparent p-0 block md:hidden"><img src="assets/icons/chat.svg" alt="Add" class="w-7 h-7 d-flex" style="vertical-align:middle; margin-right:6px;"></button>
             </div>
             <div class="title-list" id="title-list">
                 <!-- Titles will be populated here -->
                 <div class="empty-state bg-gray-50 bg-opacity-20 text-white rounded" >No titles yet. Create your first one!</div>
             </div>
+            <div class="sidebar-footer absolute bottom-10 flex flex-row justify-center items-center lg:hidden">
+                <button id="logout-btn1" class="logout-btn  btn bg-white rounded-xl d-flex text-black px-3 py-3 p-0  flex flex-row justify-center items-center" ><img src="assets/icons/logout.svg" alt="Add" class="w-4 h-4 d-flex" style="width:24px; height:24px; vertical-align:middle; margin-right:6px;">Logout</button>
+            </div>
         </div>
 
         <!-- Main Content Area -->
         <div class="main-content">
-            <!-- <header>
-                <h1>AI Thumbnail Generator</h1>
-            </header> -->
-
+            <div class="main-content-header flex items-center justify-between  lg:hidden">
+                <h2 class="text-white font-bold text-xl">
+                   <img src="assets/logo.png" alt="AITG" class="h-14 w-14 xl:h-14 xl:w-14 mb-3" style=" vertical-align:middle;align-self: center;">
+                </h2>
+                <button id="menu-btn" onclick="toggleSidebar()" class="btn p-1.5 block md:hidden  bg-menu-btn-nav"><img src="assets/icons/menu.svg" alt="Menu" style="vertical-align:middle;/* margin-right:10px; */" class="h-7 w-7"></button>
+            </div>
             <!-- Reference Images Section -->
             <div class="reference-section">
                 <h3>Reference Images</h3>

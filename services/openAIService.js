@@ -212,7 +212,7 @@ async function generateImage(ideaId, prompt, references = []) {
     // Update status to failed with error message
     try {
       const errorMsg = error.message || 'Unknown error';
-      const failureUpdateParams = ['failed', errorMsg.substring(0, 255), ideaId];
+      const failureUpdateParams = ['failed', errorMsg.substring(0, 200), ideaId];
       // Validate parameters
       if (failureUpdateParams.some(p => p === undefined)) {
         console.error('Attempted to execute query with undefined parameter:', { failureUpdateParams });
