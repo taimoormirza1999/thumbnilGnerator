@@ -317,6 +317,7 @@ function showLoading(show) {
 // Load user data from server
 async function loadUserData() {
     try {
+        showLoading(true);
         // Fetch titles
         // console.log('LUD: Fetching titles...');
         const titlesResponse = await getTitles();
@@ -339,7 +340,14 @@ async function loadUserData() {
             if (elem) {
                 elem.click();
             }
+        }else{
+            let elem = document.querySelector(`#title-list`);
+            console.log("************ elem ************")
+        console.log(elem);
+            if (elem.firstElementChild) {
+                elem.firstElementChild.click();
             }
+        }
         // console.log('LUD: Rendering global reference images...');
         renderReferenceImages(globalReferences, globalReferenceImages);
         // console.log('LUD: Global reference images rendered.');
@@ -360,8 +368,10 @@ async function loadUserData() {
         } else {
             console.log('LUD: No titles found, not starting auto-polling.');
         }
+        showLoading(false);
         // console.log('LUD: User data loading complete.');
     } catch (error) {
+        showLoading(false);
         console.error('Error loading user data (LUD):', error);
         if (error.response) {
             console.error('LUD: Server error response:', error.response.status, error.response.data);

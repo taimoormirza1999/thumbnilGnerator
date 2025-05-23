@@ -19,7 +19,10 @@
     <link rel="stylesheet" href="assets/css/login_register.css">
     <link rel="stylesheet" href="assets/css/optimize.css">
     <script src="env.js"></script>
-
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap');
+        </style>
+        
 </head>
 <body>
     <!-- Login/Register Container -->
@@ -32,7 +35,7 @@
 
             <!-- Login Form -->
             <form id="login-form">
-                <h2 class="text-lg font-semibold mb-3">Login</h2>
+                <h2 class="text-lg font-semibold mb-3 urbanist-700">Login</h2>
                 <div class="input-group">
                     <label for="login-email" class="block mb-2">Email:</label>
                     <input type="email" id="login-email" required>
@@ -41,13 +44,13 @@
                     <label for="login-password" class="block mb-2">Password:</label>
                     <input type="password" id="login-password" required>
                 </div>
-                <button type="submit" class="btn primary-btn text-center w-full">Login</button>
+                <button type="submit" class="btn primary-btn text-center w-full urbanist-700">Login</button>
                 <p>Don't have an account? <a href="#" id="show-register">Register</a></p>
             </form>
             
             <!-- Register Form -->
             <form id="register-form" style="display: none;">
-                <h2 class="text-lg font-semibold mb-3">Register</h2>
+                <h2 class="text-lg font-semibold mb-3 urbanist-700">Register</h2>
                 <div class="input-group">
                     <label for="register-username" class="block mb-2">Username:</label>
                     <input type="text" id="register-username" required>
@@ -60,7 +63,7 @@
                     <label for="register-password" class="block mb-2">Password:</label>
                     <input type="password" id="register-password" required>
                 </div>
-                <button type="submit" class="btn primary-btn">Register</button>
+                <button type="submit" class="btn primary-btn urbanist-700">Register</button>
                 <p>Already have an account? <a href="#" id="show-login">Login</a></p>
             </form>
         </div>

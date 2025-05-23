@@ -81,6 +81,17 @@
   }
 }
 
+.urbanist-700 {
+  font-weight: 700;
+}
+
+body {
+  font-family: "Urbanist", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
 .login-container {
   position: relative;
 }
@@ -89,7 +100,7 @@
   top: 50%;
   left: 50%;
   width: 70%;
-  max-width: 550px;
+  max-width: 500px;
   transform: translate(-50%, -50%);
 }
 .login-container .login-container-content .auth-form-container {
@@ -116,6 +127,9 @@
   content: "";
   z-index: -99;
   background: linear-gradient(142.31deg, #736EFF 0.94%, #FF7438 99.06%);
+}
+.login-container .login-container-content .auth-form-container input[type=password] {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /*# sourceMappingURL=login_register.css.map */

@@ -8,7 +8,7 @@
           top: 50%;
           left: 50%;
           width: 70%;
-          max-width: 550px;
+          max-width: 500px;
           transform: translate(-50%, -50%);
         .auth-form-container{
           width: 98.3%;
@@ -35,6 +35,10 @@
                   background: linear-gradient(142.31deg, #736EFF 0.94%, #FF7438 99.06%);;
         
         
+              }
+              input[type="password"]{
+              // font-size: 1.9rem;
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
               }
           }
     }

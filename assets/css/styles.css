@@ -3,7 +3,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
 }
 :root {
     --primary-color: #CE06BA;
@@ -312,7 +312,6 @@ input:focus, textarea:focus{
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: serif;
 }
 
 .primary-btn:hover {
@@ -436,9 +435,6 @@ input:focus, textarea:focus{
     margin: 0px !important;;
 }
 .copy-btn{
-    border: none;
-    background: none;
-    color: white;
     cursor: pointer;
     font-size: 0.95rem;
     color: white;
@@ -446,6 +442,9 @@ input:focus, textarea:focus{
     right: 5px;
     top: 5px;
     transition: scale 0.2s ease;
+    background: white;
+    padding: 0.15rem;
+    border-radius: 10rem;
 }
 .copy-btn:active{
     scale: 1.2;
@@ -645,16 +644,17 @@ min-width: 50%;
 }
 
 .full-prompt {
-    background-color: #f1f5f9;
+    background: linear-gradient(142.31deg, #736eff17 0.94%, rgb(251 113 113 / 11%) 99.06%);
     padding: 10px;
-    border-radius: 4px;
+    border-radius: 10px;
     font-family: monospace;
     font-size: 14px;
     white-space: pre-wrap;
     max-height: 200px;
     overflow-y: auto;
-    border: 1px solid #ddd;
+    border: 0.07rem groove rgb(244 131 34 / 65%);
     position: relative;
+
 }
 
 .reference-thumbnails {

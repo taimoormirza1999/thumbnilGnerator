@@ -81,6 +81,17 @@
   }
 }
 
+.urbanist-700 {
+  font-weight: 700;
+}
+
+body {
+  font-family: "Urbanist", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
 .thumbnail-item {
   z-index: 1;
   position: relative;

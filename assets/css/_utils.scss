@@ -224,7 +224,16 @@ $text-sizes: (
   }
 }
 
+.urbanist-700 {
+  font-weight: 700;
+}
 
+body{
+  font-family: "Urbanist", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
 
 // #mobileMenuContainer {
 //   transform: translateX(100%); /* Hidden off-screen to the right */
