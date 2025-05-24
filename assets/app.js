@@ -1099,7 +1099,7 @@ async function loadTitle(titleItem) {
         moreThumbnailsSection.style.display = currentTitle.thumbnails && currentTitle.thumbnails.length > 0 ? 'block' : 'none';
     } catch (error) {
         console.error('Error loading title:', error);
-        alert(`Failed to load title data: ${error.message}. Please try again.`);
+        // alert(`Failed to load title data: ${error.message}. Please try again.`);
     } finally {
         // showLoading(false);
     }

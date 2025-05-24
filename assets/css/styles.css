@@ -436,7 +436,7 @@ input:focus, textarea:focus{
 }
 .copy-btn{
     cursor: pointer;
-    font-size: 0.95rem;
+    font-size: 0.8rem;
     color: white;
     position: absolute;
     right: 5px;
@@ -644,15 +644,15 @@ min-width: 50%;
 }
 
 .full-prompt {
-    background: linear-gradient(142.31deg, #736eff17 0.94%, rgb(251 113 113 / 11%) 99.06%);
-    padding: 10px;
-    border-radius: 10px;
+    background: white;
+    padding: 0.3rem;
+    border-radius: 8px;
     font-family: monospace;
     font-size: 14px;
     white-space: pre-wrap;
     max-height: 200px;
     overflow-y: auto;
-    border: 0.07rem groove rgb(244 131 34 / 65%);
+    /* border: 0.07rem groove rgb(244 131 34 / 65%); */
     position: relative;
 
 }

@@ -4,8 +4,6 @@ import axios from 'https://cdn.jsdelivr.net/npm/axios@1.3.5/+esm';
 // Use the full server address with port where your backend is running
 // const API_URL = 'http://localhost:3002/api';
 const { API_URL, OTHER_FLAG } = window.__ENV__
-// alert(API_URL+'/api/');
-// alert(API_URL);
 // Create axios instance with auth token
 const api = axios.create({
   baseURL: API_URL + '/api/',
